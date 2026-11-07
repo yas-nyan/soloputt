@@ -70,12 +70,14 @@ select { color: inherit; padding: .35rem .6rem; border: 1px solid #b9ccbc; backg
 #ball { fill: #fffef1; stroke: #233e2b; stroke-width: 1; }
 .course-caption { position: absolute; bottom: .62rem; left: .65rem; color: #e5f2d7; font: 700 .61rem/1.4 ui-monospace, monospace; letter-spacing: .08em; }
 .course-caption span { margin-left: .4rem; color: #c6dac7; letter-spacing: 0; }
-.console-values { display: grid; grid-template-rows: 1fr 1fr auto; gap: .55rem; }
+.console-values { display: grid; grid-template: 1fr 1fr auto / repeat(2, minmax(0, 1fr)); gap: .55rem; }
 .console-values > div { padding: .55rem .8rem; background: #20392e; border: 1px solid #345345; border-radius: .7rem; }
+.console-values > div:not(.console-detail) { grid-column: 1 / -1; }
 .console-values dt { color: #c0d5c3; }
 .console-values dd { color: var(--lime); font-size: clamp(1.5rem, 5vw, 3.3rem); line-height: 1.05; letter-spacing: -.055em; }
 .console-values dd small { color: #c0d5c3; margin-left: .3em; font-size: .42em; }
-.console-values div:last-child dd { margin-top: .2rem; font-size: clamp(.83rem, 2.15vw, 1.06rem); line-height: 1.35; letter-spacing: 0; }
+.console-values .console-detail dd { margin-top: .2rem; font-size: clamp(.83rem, 2.15vw, 1.06rem); line-height: 1.35; letter-spacing: 0; }
+.console-values #green-angle { font-size: clamp(1.1rem, 3vw, 1.55rem); }
 dt { font-size: .78rem; }
 dd { font-weight: 800; font-variant-numeric: tabular-nums; }
 
@@ -174,7 +176,8 @@ tbody tr:hover { background: #eaf0e4; }
   nav { gap: .1rem; }
   nav a { padding: .48rem .45rem; }
   .console-body { grid-template-columns: 1fr; }
-  .console-values { grid-template: auto / repeat(3, minmax(0, 1fr)); }
+  .console-values { grid-template-rows: auto auto; }
+  .console-values > div:not(.console-detail) { grid-column: auto; }
   .console-values > div { padding: .45rem .36rem; }
   .console-values dt { font-size: .68rem; }
   .about-grid { grid-template-columns: 1fr; }

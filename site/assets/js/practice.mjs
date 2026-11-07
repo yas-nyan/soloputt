@@ -252,7 +252,9 @@ export function setupPractice() {
     field("shot-outcome").dataset.outcome = result.outcome;
     field("shot-reason").textContent = REASONS[result.reason] ?? "カップに収まりました";
     field("shot-distance").textContent = shot.distance.toFixed(2);
-    field("shot-angle").textContent = shot.angle === 10 ? "エラー" : formatAngle(shot.angle);
+    const angle = shot.angle === 10 ? "エラー" : formatAngle(shot.angle);
+    field("shot-angle").textContent = angle;
+    field("green-angle").textContent = shot.angle === 10 ? angle : `${angle}°`;
     field("angle-unit").hidden = shot.angle === 10;
     field("shot-speed").textContent = shot.speed.toFixed(2);
     field("shot-remaining").textContent = result.remaining?.toFixed(2) ?? "—";
@@ -294,7 +296,7 @@ export function setupPractice() {
     field("shot-round").hidden = true;
     field("angle-unit").hidden = false;
     field("round-notice").textContent = "";
-    for (const id of ["shot-distance", "shot-angle", "shot-speed", "shot-remaining"]) field(id).textContent = "—";
+    for (const id of ["shot-distance", "shot-angle", "shot-speed", "shot-remaining", "green-angle"]) field(id).textContent = "—";
     showTarget();
   }
 
