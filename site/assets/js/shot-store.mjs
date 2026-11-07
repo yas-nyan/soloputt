@@ -1,10 +1,27 @@
+import { classifyLeave } from "./putting.mjs";
+
 const STORE = "shots";
 let database;
 
 function openDatabase() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("soloputt", 1);
-    request.onupgradeneeded = () => request.result.createObjectStore(STORE, { autoIncrement: true });
+    const request = indexedDB.open("soloputt", 2);
+    request.onupgradeneeded = (event) => {
+      if (event.oldVersion === 0) {
+        request.result.createObjectStore(STORE, { autoIncrement: true });
+        return;
+      }
+      const cursorRequest = request.transaction.objectStore(STORE).openCursor();
+      cursorRequest.onsuccess = () => {
+        const cursor = cursorRequest.result;
+        if (!cursor) return;
+        const shot = cursor.value;
+        if (shot.outcome === "miss" && classifyLeave(shot.leave) === "concede") {
+          cursor.update({ ...shot, outcome: "concede" });
+        }
+        cursor.continue();
+      };
+    };
     request.onerror = () => reject(request.error);
     request.onsuccess = () => {
       const db = request.result;

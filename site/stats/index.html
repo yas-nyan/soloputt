@@ -21,7 +21,7 @@
       <div>
         <p class="eyebrow">PRACTICE RECORD</p>
         <h1 id="page-title">練習の記録</h1>
-        <p>目標距離ごとのカップイン率と、ミスしたときの残り距離。</p>
+        <p>目標距離ごとのカップイン率、OK圏内率、カップまでの残り距離。</p>
       </div>
       <label class="stats-filter" for="scenario-filter">練習メニュー
         <select id="scenario-filter">
@@ -36,17 +36,18 @@
       <dl class="stat-cards">
         <div class="panel"><dt>総パット数</dt><dd id="total">—</dd><dd id="judged" class="stat-note"></dd></div>
         <div class="panel"><dt>カップイン率</dt><dd id="rate">—</dd><dd id="cup-count" class="stat-note"></dd></div>
-        <div class="panel"><dt>ミス時の平均残り</dt><dd id="average-leave">—</dd><dd class="stat-note">止まった位置からカップまで</dd></div>
+        <div class="panel"><dt>OK圏内率</dt><dd id="concede-rate">—</dd><dd id="concede-count" class="stat-note"></dd></div>
+        <div class="panel"><dt>入らなかった球の平均残り</dt><dd id="average-leave">—</dd><dd class="stat-note">止まった位置からカップまで</dd></div>
       </dl>
       <section class="panel stats-section" aria-labelledby="distance-heading">
         <div class="panel-heading"><p class="eyebrow">BY DISTANCE</p><h2 id="distance-heading">目標距離別</h2></div>
         <div class="table-wrap" tabindex="0" role="region" aria-labelledby="distance-heading">
           <table>
-            <thead><tr><th scope="col">目標</th><th scope="col">球数</th><th scope="col">カップイン</th><th scope="col">ミス時の平均残り</th></tr></thead>
+            <thead><tr><th scope="col">目標</th><th scope="col">球数</th><th scope="col">カップイン</th><th scope="col">OK圏内</th><th scope="col">平均残り</th></tr></thead>
             <tbody id="distance-stats"></tbody>
           </table>
         </div>
-        <p class="note">角度エラーなどの判定対象外の球は、カップイン率と平均残り距離の計算から除きます。</p>
+        <p class="note">OK圏内はカップインせず、停止位置がカップから1 m未満の球です。判定対象外の球は各率と平均残り距離から除きます。</p>
       </section>
       <section class="panel stats-section" aria-labelledby="history-heading">
         <div class="row">

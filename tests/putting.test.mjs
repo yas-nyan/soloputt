@@ -19,6 +19,13 @@ test("uses green speed and lateral offset for the capture limit", () => {
   assert.equal(evaluatePutt({ distance: 10, angle: 0 }, 3, 244).reason, "pace");
 });
 
+test("records an uncaptured putt under one metre as a separate outcome", () => {
+  assert.equal(evaluatePutt({ distance: 2.1, angle: 0 }, 3, 244).outcome, "concede");
+  assert.equal(evaluatePutt({ distance: 4, angle: 2 }, 3, 244).outcome, "miss");
+  assert.equal(evaluatePutt({ distance: 2, angle: 0 }, 3, 244).outcome, "miss");
+  assert.equal(evaluatePutt({ distance: 3, angle: 2 }, 3, 244).outcome, "concede");
+});
+
 test("keeps error markers and unavailable settings out of the cup-in rate", () => {
   assert.equal(evaluatePutt({ distance: 3.36, angle: 10 }, 3, 244).outcome, "unjudged");
   assert.equal(evaluatePutt({ distance: 3.36, angle: 0 }, 3, null).outcome, "unjudged");

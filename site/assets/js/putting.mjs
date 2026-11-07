@@ -3,6 +3,11 @@ const STIMP_RELEASE_SPEED = 1.83;
 const CENTRE_CAPTURE_SPEED = 1.63;
 
 const MIN_TARGET = 0.5;
+const OK_DISTANCE = 1;
+
+export function classifyLeave(distance) {
+  return Number.isFinite(distance) && distance >= 0 && distance < OK_DISTANCE ? "concede" : "miss";
+}
 
 export function randomTarget(maximum, previous, random = Math.random) {
   const first = Math.round(MIN_TARGET * 10);
@@ -31,19 +36,20 @@ export function evaluatePutt(shot, target, greenSpeed) {
     return { outcome: "unjudged", reason: "green" };
   }
 
+  const outsideCup = { ...motion, outcome: classifyLeave(remaining) };
   // Penner (2002), Eq. 23, evaluated at the first intersection with the cup circle.
   const offset = Math.abs(target * lateral);
-  if (offset >= CUP_RADIUS || forward <= 0) return { ...motion, outcome: "miss", reason: "line" };
+  if (offset >= CUP_RADIUS || forward <= 0) return { ...outsideCup, reason: "line" };
   const entry = target * forward - Math.sqrt(CUP_RADIUS ** 2 - offset ** 2);
   const speedSquared = 2 * deceleration * (shot.distance - entry);
-  if (speedSquared <= 0) return { ...motion, outcome: "miss", reason: "short" };
+  if (speedSquared <= 0) return { ...outsideCup, reason: "short" };
 
   const limit = CENTRE_CAPTURE_SPEED * (1 - (offset / CUP_RADIUS) ** 2);
-  if (Math.sqrt(speedSquared) >= limit) return { ...motion, outcome: "miss", reason: "pace" };
+  if (Math.sqrt(speedSquared) >= limit) return { ...outsideCup, reason: "pace" };
   return { ...motion, outcome: "holed", travel: entry, remaining: 0 };
 }
 
-export const OUTCOME_LABELS = { holed: "カップイン", miss: "ミス", unjudged: "判定対象外" };
+export const OUTCOME_LABELS = { holed: "カップイン", concede: "OK圏内", miss: "ミス", unjudged: "判定対象外" };
 
 export function formatAngle(angle) {
   if (angle === 0) return "0.00";

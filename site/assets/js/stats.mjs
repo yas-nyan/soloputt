@@ -10,22 +10,29 @@ let records = [];
 
 function summarize(shots) {
   let holed = 0;
+  let conceded = 0;
   let missed = 0;
   let leave = 0;
   for (const shot of shots) {
     if (shot.outcome === "holed") holed++;
-    if (shot.outcome === "miss") {
-      missed++;
-      leave += shot.leave;
-    }
+    if (shot.outcome === "concede") conceded++;
+    if (shot.outcome === "miss") missed++;
+    if (shot.outcome === "miss" || shot.outcome === "concede") leave += shot.leave;
   }
-  const judged = holed + missed;
+  const outsideCup = conceded + missed;
+  const judged = holed + outsideCup;
   return {
     holed,
+    conceded,
     judged,
-    rate: judged ? `${Math.round(100 * holed / judged)}%` : "—",
-    average: missed ? `${(leave / missed).toFixed(2)} m` : "—",
+    rate: rate(holed, judged),
+    concedeRate: rate(conceded, judged),
+    average: outsideCup ? `${(leave / outsideCup).toFixed(2)} m` : "—",
   };
+}
+
+function rate(count, total) {
+  return total ? `${Math.round(100 * count / total)}%` : "—";
 }
 
 function renderRows(id, rows) {
@@ -54,11 +61,16 @@ function render() {
   field("judged").textContent = `判定対象 ${summary.judged} 球`;
   field("rate").textContent = summary.rate;
   field("cup-count").textContent = `${summary.holed} 球カップイン`;
+  field("concede-rate").textContent = summary.concedeRate;
+  field("concede-count").textContent = `${summary.conceded} 球がOK圏内`;
   field("average-leave").textContent = summary.average;
 
   renderRows("distance-stats", [...groups].sort(([a], [b]) => a - b).map(([target, group]) => {
-    const { rate, holed, judged, average } = summarize(group);
-    return [`${target.toFixed(1)} m`, group.length, judged ? `${rate}（${holed}/${judged}）` : "—", average];
+    const { rate, holed, concedeRate, conceded, judged, average } = summarize(group);
+    return [
+      `${target.toFixed(1)} m`, group.length, judged ? `${rate}（${holed}/${judged}）` : "—",
+      judged ? `${concedeRate}（${conceded}/${judged}）` : "—", average,
+    ];
   }));
 
   const history = shots.slice(-50).reverse();

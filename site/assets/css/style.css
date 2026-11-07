@@ -95,6 +95,7 @@ dd { font-weight: 800; font-variant-numeric: tabular-nums; }
 .shot-summary > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .65rem; }
 #shot-outcome { font-size: 1.24rem; }
 #shot-outcome[data-outcome="holed"] { color: #1b6940; }
+#shot-outcome[data-outcome="concede"] { color: #386327; }
 #shot-outcome[data-outcome="miss"] { color: #855325; }
 #shot-target { color: var(--text-muted); font-size: .8rem; }
 .measurements { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .32rem; }
@@ -118,7 +119,7 @@ details .note { margin-top: .5rem; }
 #log { margin: .5rem 0 0; padding-left: 1.35rem; font: .81rem/1.6 ui-monospace, monospace; overflow-wrap: anywhere; }
 
 .stats-filter { display: grid; gap: .2rem; min-width: 10rem; font-size: .83rem; font-weight: 700; }
-.stat-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .7rem; margin-bottom: .75rem; }
+.stat-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .7rem; margin-bottom: .75rem; }
 .stat-cards dt { color: var(--text-muted); }
 .stat-cards dd { font-size: clamp(1.2rem, 4vw, 2.5rem); }
 .stat-cards .stat-note { font-size: .75rem; font-weight: 400; color: var(--text-muted); }
@@ -143,6 +144,6 @@ th { background: #e8eee1; font-size: .78rem; }
   .console-values > div { padding: .45rem .36rem; }
   .console-values dt { font-size: .68rem; }
   .about-grid { grid-template-columns: 1fr; }
-  .stat-cards { gap: .3rem; }
+  .stat-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .3rem; }
   .stat-cards .panel { padding: .5rem .4rem; }
 }
