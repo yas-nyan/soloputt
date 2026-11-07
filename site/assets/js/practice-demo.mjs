@@ -1,17 +1,30 @@
 export const DEMO_GREEN_SPEED = 244;
 
-export function demoShot(outcome, target) {
-  let distance = target;
-  let angle = 0;
-  if (outcome === "concede") distance -= Math.min(0.45, target * 0.55);
-  if (outcome === "miss") {
-    if (target >= 2.1) {
-      distance -= 1.35;
-    } else {
-      distance += 1.45;
-      angle = -8;
-    }
+function angleForOffset(offset, target) {
+  return Math.asin(offset / target) * 180 / Math.PI;
+}
+
+export function demoShot(outcome, target, random = Math.random) {
+  const side = random() < 0.5 ? -1 : 1;
+  let distance;
+  let angle;
+
+  if (outcome === "holed") {
+    // Keep both the lateral offset and the entry speed inside the capture limit.
+    const offset = 0.005 + random() * 0.032;
+    angle = angleForOffset(offset, target);
+    distance = target + random() * 0.3;
+  } else {
+    // Aim outside the lip so that an overhit demo ball cannot be captured.
+    const minimumAngle = angleForOffset(0.06, target);
+    const isOK = outcome === "concede";
+    const maximumAngle = isOK ? angleForOffset(Math.min(0.16, target * 0.16), target) : 8.8;
+    angle = minimumAngle + random() * (maximumAngle - minimumAngle);
+    const gap = isOK ? 0.12 + random() * 0.25 : 0.65 + random() * 1.05;
+    const short = target - gap >= 0.1 && random() < 0.5;
+    distance = target + (short ? -gap : gap);
   }
+
   const speed = 1.83 * Math.sqrt(distance / (DEMO_GREEN_SPEED / 100));
-  return { distance, rollSpeed: speed, angle, remaining: 0, speed };
+  return { distance, rollSpeed: speed, angle: side * angle, remaining: 0, speed };
 }
