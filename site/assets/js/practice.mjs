@@ -1,5 +1,6 @@
 import { recordStroke } from "./finish-round.mjs";
 import { evaluatePutt, formatAngle, OUTCOME_LABELS, randomTarget } from "./putting.mjs";
+import { DEMO_GREEN_SPEED, demoShot } from "./practice-demo.mjs";
 import { saveShot } from "./shot-store.mjs";
 
 const BALL_X = 260;
@@ -25,6 +26,8 @@ export function setupPractice() {
   const trail = field("trail");
   const course = field("practice-course");
   const feedback = field("course-feedback");
+  const demoControls = field("demo-controls");
+  const demoButtons = demoControls.querySelectorAll("button[data-demo-outcome]");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let scenario = "fixed";
   let distanceRange = { min: 3, max: 3 };
@@ -38,6 +41,8 @@ export function setupPractice() {
   let saveFailures = 0;
   let round;
   let pendingRound;
+  let demo = false;
+  let demoShots = 0;
 
   function hideFeedback() {
     feedback.hidden = true;
@@ -53,8 +58,13 @@ export function setupPractice() {
     feedback.hidden = false;
   }
 
+  function setDemoBusy(busy) {
+    for (const button of demoButtons) button.disabled = busy;
+  }
+
   function showTarget() {
     hideFeedback();
+    if (demo) setDemoBusy(false);
     field("target").textContent = target.toFixed(round?.strokes ? 2 : 1);
     field("remaining").textContent = target.toFixed(2);
     const range = `${distanceRange.min.toFixed(1)}〜${distanceRange.max.toFixed(1)} m`;
@@ -82,7 +92,7 @@ export function setupPractice() {
 
   function startRound() {
     target = nextDistance(round?.start);
-    round = { id: crypto.randomUUID(), start: target, strokes: 0 };
+    round = { start: target, strokes: 0 };
   }
 
   function advanceRound() {
@@ -196,6 +206,8 @@ export function setupPractice() {
           target = nextDistance(target);
           showTarget();
         }, 1200);
+      } else if (demo) {
+        setDemoBusy(false);
       }
     }
 
@@ -216,7 +228,7 @@ export function setupPractice() {
     frame = requestAnimationFrame(step);
   }
 
-  function showShot(shot) {
+  function receiveShot(shot, persist) {
     if (pendingRound) {
       field("round-notice").textContent = "次の「準備完了」が出てから打ってください。";
       return;
@@ -228,7 +240,7 @@ export function setupPractice() {
       round.strokes = stroke.stroke;
       pendingRound = { score: stroke.score, remaining: result.remaining };
     }
-    const number = ++shots;
+    const number = persist ? ++shots : ++demoShots;
     field("shot-count").textContent = `${number} 球`;
     field("shot-target").textContent = `目標 ${target.toFixed(round ? 2 : 1)} m`;
     field("shot-round").hidden = !stroke;
@@ -252,16 +264,49 @@ export function setupPractice() {
       animate(shot, result, stroke);
     }
 
+    if (!persist) return;
     saveShot({
       time: Date.now(), target, scenario, greenSpeed, ...shot,
       outcome: result.outcome, leave: result.remaining ?? null, model: 1,
-      ...(stroke ? { roundId: round.id, roundStart: round.start, roundStroke: stroke.stroke, roundScore: stroke.score } : {}),
+      ...(stroke ? { roundId: (round.id ??= crypto.randomUUID()), roundStart: round.start, roundStroke: stroke.stroke, roundScore: stroke.score } : {}),
     }).catch(() => {
       field("save-status").textContent = `${++saveFailures} 球を履歴に保存できませんでした`;
     });
   }
 
+  function setDemo(enabled) {
+    stopAnimation();
+    demo = enabled;
+    ready = enabled;
+    pendingRound = undefined;
+    round = undefined;
+    if (scenario === "finish") startRound();
+    else target = nextDistance(target);
+    setGreen(enabled ? { greenSpeed: DEMO_GREEN_SPEED } : null);
+    demoControls.hidden = !enabled;
+    field("save-status").hidden = enabled;
+    demoShots = 0;
+    field("shot-count").textContent = `${enabled ? demoShots : shots} 球`;
+    field("shot-target").textContent = "目標 —";
+    field("shot-outcome").textContent = "受信待ち";
+    delete field("shot-outcome").dataset.outcome;
+    field("shot-reason").textContent = enabled ? "結果ボタンからパットを再生できます。" : "打つとここに結果を表示します。";
+    field("shot-round").hidden = true;
+    field("angle-unit").hidden = false;
+    field("round-notice").textContent = "";
+    for (const id of ["shot-distance", "shot-angle", "shot-speed", "shot-remaining"]) field(id).textContent = "—";
+    showTarget();
+  }
+
+  for (const button of demoButtons) {
+    button.addEventListener("click", () => {
+      if (!demo || button.disabled) return;
+      setDemoBusy(true);
+      receiveShot(demoShot(button.dataset.demoOutcome, target), false);
+    });
+  }
+
   updateDistanceFields();
   showTarget();
-  return { setReady, setGreen, showShot };
+  return { setReady, setGreen, setDemo, showShot: (shot) => { if (!demo) receiveShot(shot, true); } };
 }

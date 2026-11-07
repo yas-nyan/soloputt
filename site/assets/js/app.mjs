@@ -5,11 +5,15 @@ import { setupPractice } from "./practice.mjs";
 const connect = document.querySelector("#connect");
 const scanAll = document.querySelector("#scan-all");
 const disconnect = document.querySelector("#disconnect");
+const demoToggle = document.querySelector("#practice-demo-toggle");
 const status = document.querySelector("#status");
 const logList = document.querySelector("#log");
 const setSettingsConnection = setupDeviceSettings();
 const practice = setupPractice();
+const supportsBluetooth = window.isSecureContext && typeof navigator.bluetooth?.requestDevice === "function";
+const unsupportedMessage = "このページではBLE接続を利用できません";
 let connection;
+let demo = false;
 
 function setStatus(message, state = "idle") {
   status.textContent = message;
@@ -24,11 +28,13 @@ function log(message) {
 }
 
 function setDiscoveryDisabled(disabled) {
-  connect.disabled = disabled;
-  scanAll.disabled = disabled;
+  connect.disabled = !supportsBluetooth || disabled || demo;
+  scanAll.disabled = connect.disabled;
+  demoToggle.disabled = disabled;
 }
 
 async function connectDevice(showAll) {
+  if (connect.disabled) return;
   setDiscoveryDisabled(true);
   logList.replaceChildren();
   setStatus("機器を選択してください", "working");
@@ -81,8 +87,18 @@ scanAll.addEventListener("click", () => connectDevice(true));
 disconnect.addEventListener("click", () => connection?.close());
 window.addEventListener("pagehide", () => connection?.close());
 
-if (!window.isSecureContext || typeof navigator.bluetooth?.requestDevice !== "function") {
-  setDiscoveryDisabled(true);
-  setStatus("このページではBLE接続を利用できません");
+demoToggle.addEventListener("click", () => {
+  if (demoToggle.disabled) return;
+  demo = !demo;
+  practice.setDemo(demo);
+  demoToggle.setAttribute("aria-expanded", String(demo));
+  demoToggle.textContent = demo ? "デモを終了" : "デモを試す";
+  setDiscoveryDisabled(false);
+  setStatus(demo ? "デモモード" : supportsBluetooth ? "未接続" : unsupportedMessage, demo ? "ready" : "idle");
+});
+
+setDiscoveryDisabled(false);
+if (!supportsBluetooth) {
+  setStatus(unsupportedMessage);
   document.querySelector("#compatibility").hidden = false;
 }

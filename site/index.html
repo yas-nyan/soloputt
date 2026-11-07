@@ -29,6 +29,7 @@
         <div class="connection-actions">
           <button id="connect" type="button">ZeroPuttに接続</button>
           <button id="disconnect" class="secondary" type="button" disabled>切断</button>
+          <button id="practice-demo-toggle" class="secondary" type="button" aria-controls="demo-controls" aria-expanded="false">デモを試す</button>
         </div>
       </div>
     </section>
@@ -71,6 +72,15 @@
       </div>
       <p id="round-progress" class="round-progress" hidden></p>
       <p id="round-notice" class="round-notice" role="status"></p>
+      <fieldset id="demo-controls" class="practice-demo" hidden>
+        <legend>デモ打球</legend>
+        <p>この打球は実打履歴に保存されません。</p>
+        <div class="actions">
+          <button type="button" data-demo-outcome="holed" data-tone="holed">カップインを再生</button>
+          <button type="button" data-demo-outcome="concede" data-tone="concede">OKを再生</button>
+          <button type="button" data-demo-outcome="miss" data-tone="miss">ミスを再生</button>
+        </div>
+      </fieldset>
     </section>
 
     <div class="practice-grid">
