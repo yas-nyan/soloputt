@@ -148,7 +148,7 @@ function renderStats(stats, daily, dateRange) {
 
 function renderHistory(history) {
   field("history-count").textContent = `このページ ${history.entries.length} / 全 ${selectedTotal} 球`;
-  const scenarios = { fixed: "固定", random: "ランダム", finish: "打ち切り" };
+  const scenarios = { fixed: "固定", random: "ランダム", finish: "ホールアウト" };
   renderRows("history", history.entries.map(({ shot }) => [
     dateTime.format(shot.time), scenarios[shot.scenario],
     `${shot.target.toFixed(shot.scenario === "finish" ? 2 : 1)} m`, metric(OUTCOME_LABELS[shot.outcome], shot.outcome), `${shot.distance.toFixed(2)} m`,

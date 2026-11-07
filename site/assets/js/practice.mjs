@@ -55,7 +55,7 @@ export function setupPractice() {
     field("target").textContent = target.toFixed(round?.strokes ? 2 : 1);
     field("remaining").textContent = target.toFixed(2);
     field("scenario-label").textContent = scenario === "random" ? `${limit.toFixed(1)} m以内ランダム`
-      : round ? "打ち切り" : "固定距離";
+      : round ? "ホールアウト" : "固定距離";
     field("round-progress").hidden = !round;
     if (round) field("round-progress").textContent = `開始 ${limit.toFixed(1)} m · 次は ${round.strokes + 1} 打目`;
     field("round-status").textContent = ready ? "準備完了" : "接続待ち";
@@ -85,7 +85,7 @@ export function setupPractice() {
 
   form.addEventListener("change", (event) => {
     if (event.target.name !== "scenario") return;
-    const labels = { fixed: "目標距離", random: "ランダムの上限", finish: "打ち切りの開始距離" };
+    const labels = { fixed: "目標距離", random: "ランダムの上限", finish: "ホールアウトの開始距離" };
     field("target-label").textContent = labels[event.target.value];
   });
 

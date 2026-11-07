@@ -81,13 +81,13 @@
             <legend class="sr-only">距離の出し方</legend>
             <label><input type="radio" name="scenario" value="fixed" checked><span>固定距離</span></label>
             <label><input type="radio" name="scenario" value="random"><span>ランダム</span></label>
-            <label><input type="radio" name="scenario" value="finish"><span>打ち切り</span></label>
+            <label><input type="radio" name="scenario" value="finish"><span>ホールアウト</span></label>
           </fieldset>
           <div class="distance-control">
             <label for="target-range" id="target-label">目標距離</label>
             <div><input id="target-range" type="number" min="0.5" max="20" step="0.1" value="3.0" inputmode="decimal" required><span>m</span></div>
           </div>
-          <p class="note">ランダムは0.5 mから指定距離まで。打ち切りは残り距離から続け、カップインか1 m未満のOKで終了します。</p>
+          <p class="note">ランダムは0.5 mから指定距離まで。ホールアウトは残り距離から続け、カップインか1 m未満のOKで終了します。</p>
           <button type="submit" class="apply-target">目標を適用</button>
         </form>
       </section>

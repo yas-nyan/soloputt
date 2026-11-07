@@ -65,11 +65,11 @@ function readValue(field, value) {
 function validateRound(shot) {
   if (shot.target < 0.5 || (shot.scenario !== "finish" && shot.target > 20)) throw new Error("target が範囲外です");
   if (shot.scenario !== "finish" || shot.outcome === "unjudged") {
-    if (ROUND_FIELDS.some((field) => shot[field] != null)) throw new Error("打ち切りの打数は判定済みの打ち切りショットにだけ指定できます");
+    if (ROUND_FIELDS.some((field) => shot[field] != null)) throw new Error("ホールアウトの打数は判定済みのホールアウトショットにだけ指定できます");
     return;
   }
   const { roundId, roundStart, roundStroke, roundScore } = shot;
-  if (!roundId || !(roundStart >= 0.5 && roundStart <= 20) || !roundStroke) throw new Error("打ち切りの識別子・開始距離・打数が必要です");
+  if (!roundId || !(roundStart >= 0.5 && roundStart <= 20) || !roundStroke) throw new Error("ホールアウトの識別子・開始距離・打数が必要です");
   if ((roundScore ?? null) !== recordStroke(roundStroke - 1, shot.outcome).score) throw new Error("roundScore がショットの結果と一致しません");
 }
 
