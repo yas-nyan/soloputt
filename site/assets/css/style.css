@@ -118,6 +118,9 @@ details .note { margin-top: .5rem; }
 #scan-all { margin-top: .5rem; }
 #log { margin: .5rem 0 0; padding-left: 1.35rem; font: .81rem/1.6 ui-monospace, monospace; overflow-wrap: anywhere; }
 
+.stats-filters { display: flex; flex-wrap: wrap; gap: .5rem; }
+.custom-range { width: 100%; padding: 0; margin: 0; border: 0; }
+.stats-filter input[type="date"] { min-height: 44px; border: 1px solid #b9ccbc; border-radius: .55rem; padding: .35rem .6rem; background: var(--paper); color: inherit; }
 .stats-filter { display: grid; gap: .2rem; min-width: 10rem; font-size: .83rem; font-weight: 700; }
 .stat-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .7rem; margin-bottom: .75rem; }
 .stat-cards dt { color: var(--text-muted); }

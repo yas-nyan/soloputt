@@ -1,6 +1,7 @@
 import { classifyLeave } from "./putting.mjs";
 import { shotIdentity } from "./shot-csv.mjs";
-import { addShot, createStats } from "./stats-data.mjs";
+import { localDay } from "./stats-dates.mjs";
+import { addDailyShot, addShot, createDailyStats, createStats } from "./stats-data.mjs";
 
 const SHOTS = "shots";
 const STATS = "stats";
@@ -13,11 +14,12 @@ function upgrade(request, oldVersion) {
   const db = request.result;
   const shots = oldVersion === 0 ? db.createObjectStore(SHOTS, { autoIncrement: true })
     : request.transaction.objectStore(SHOTS);
-  if (shots.indexNames.contains("scenario")) shots.deleteIndex("scenario");
-  shots.createIndex(TIME, TIME);
-  shots.createIndex(SCENARIO_TIME, ["scenario", TIME]);
-  if (oldVersion >= 3) return;
-  const stats = db.createObjectStore(STATS);
+  if (oldVersion < 4) {
+    if (shots.indexNames.contains("scenario")) shots.deleteIndex("scenario");
+    shots.createIndex(TIME, TIME);
+    shots.createIndex(SCENARIO_TIME, ["scenario", TIME]);
+  }
+  const stats = oldVersion < 3 ? db.createObjectStore(STATS) : request.transaction.objectStore(STATS);
   if (oldVersion === 0) return;
 
   const summaries = new Map();
@@ -41,7 +43,7 @@ function upgrade(request, oldVersion) {
 
 function openDatabase() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("soloputt", 4);
+    const request = indexedDB.open("soloputt", 5);
     request.onupgradeneeded = (event) => upgrade(request, event.oldVersion);
     request.onerror = () => reject(request.error);
     request.onsuccess = () => {
@@ -141,21 +143,25 @@ export function forEachShot(visit) {
   });
 }
 
-function readHistory(shots, scenario, boundary, newer, pageSize) {
+function shotCursor(shots, scenario, lower, upper, direction) {
   const filtered = scenario !== "all";
-  const direction = newer ? "next" : "prev";
   const index = shots.index(filtered ? SCENARIO_TIME : TIME);
-  const indexKey = (time) => filtered ? [scenario, time] : time;
-  const lower = newer && boundary ? boundary.time : -MAX_TIME;
-  const upper = !newer && boundary ? boundary.time : MAX_TIME;
-  const range = IDBKeyRange.bound(indexKey(lower), indexKey(upper));
+  const key = (time) => filtered ? [scenario, time] : time;
+  return index.openCursor(IDBKeyRange.bound(key(lower), key(upper)), direction);
+}
+
+function readHistory(shots, scenario, dateRange, boundary, newer, pageSize) {
+  const start = dateRange?.start ?? -MAX_TIME;
+  const last = dateRange ? dateRange.end - 1 : MAX_TIME;
+  const lower = newer && boundary ? boundary.time : start;
+  const upper = !newer && boundary ? boundary.time : last;
   const entries = [];
   let more = false;
-  const request = index.openCursor(range, direction);
+  const request = shotCursor(shots, scenario, lower, upper, newer ? "next" : "prev");
   request.onsuccess = () => {
     const cursor = request.result;
     if (!cursor) return;
-    const time = filtered ? cursor.key[1] : cursor.key;
+    const time = scenario === "all" ? cursor.key : cursor.key[1];
     const id = cursor.primaryKey;
     // Timestamps may tie. Use the primary key to resume within that group.
     if (boundary && time === boundary.time) {
@@ -182,11 +188,38 @@ function readHistory(shots, scenario, boundary, newer, pageSize) {
   });
 }
 
-export function readStatsPage(scenario, { boundary = null, newer = false, pageSize = 50 } = {}) {
+function readPeriodStats(transaction, scenario, dateRange) {
+  const daily = new Map();
+  const summary = dateRange ? createStats() : null;
+  const stats = transaction.objectStore(STATS);
+  const stored = dateRange ? null : scenario === "all" ? stats.getAll() : stats.getAll(scenario);
+  const shots = transaction.objectStore(SHOTS);
+  const request = shotCursor(shots, scenario, dateRange?.start ?? -MAX_TIME,
+    dateRange ? dateRange.end - 1 : MAX_TIME, "prev");
+
+  request.onsuccess = () => {
+    const cursor = request.result;
+    if (!cursor) return;
+    const shot = cursor.value;
+    const day = localDay(shot.time);
+    if (!daily.has(day)) {
+      if (!dateRange && daily.size === 7) return;
+      daily.set(day, createDailyStats());
+    }
+    if (summary) addShot(summary, shot);
+    addDailyShot(daily.get(day), shot);
+    cursor.continue();
+  };
+
+  return () => ({ summaries: summary ? [summary] : stored.result, daily });
+}
+
+export function readStatsPage(scenario, {
+  dateRange = null, boundary = null, newer = false, pageSize = 50, includeStats = true,
+} = {}) {
   return access("readonly", (transaction) => {
-    const stats = transaction.objectStore(STATS);
-    const summaries = scenario === "all" ? stats.getAll() : stats.getAll(scenario);
-    const history = readHistory(transaction.objectStore(SHOTS), scenario, boundary, newer, pageSize);
-    return () => ({ summaries: summaries.result, ...history() });
+    const stats = includeStats ? readPeriodStats(transaction, scenario, dateRange) : () => ({});
+    const history = readHistory(transaction.objectStore(SHOTS), scenario, dateRange, boundary, newer, pageSize);
+    return () => ({ ...stats(), ...history() });
   });
 }

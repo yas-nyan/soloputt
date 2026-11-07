@@ -23,13 +23,30 @@
         <h1 id="page-title">練習の記録</h1>
         <p>距離ごとの成績と、打ち出し方向のばらつき。</p>
       </div>
-      <label class="stats-filter" for="scenario-filter">練習メニュー
-        <select id="scenario-filter">
-          <option value="all">すべて</option>
-          <option value="fixed">固定距離</option>
-          <option value="random">以内ランダム</option>
-        </select>
-      </label>
+      <div class="stats-filters">
+        <label class="stats-filter" for="period-filter">期間
+          <select id="period-filter">
+            <option value="all">全期間</option>
+            <option value="today">今日</option>
+            <option value="yesterday">昨日</option>
+            <option value="week">過去7日（今日を含む）</option>
+            <option value="month">過去30日（今日を含む）</option>
+            <option value="custom">日付を指定</option>
+          </select>
+        </label>
+        <label class="stats-filter" for="scenario-filter">練習メニュー
+          <select id="scenario-filter">
+            <option value="all">すべて</option>
+            <option value="fixed">固定距離</option>
+            <option value="random">以内ランダム</option>
+          </select>
+        </label>
+        <fieldset id="custom-range" class="stats-filters custom-range" hidden>
+          <legend class="sr-only">期間を日付で指定</legend>
+          <label class="stats-filter" for="stats-from">開始日<input id="stats-from" type="date"></label>
+          <label class="stats-filter" for="stats-to">終了日<input id="stats-to" type="date"></label>
+        </fieldset>
+      </div>
     </section>
     <section class="panel csv-tools" aria-labelledby="csv-heading">
       <div class="row">
@@ -53,6 +70,19 @@
         <div class="panel"><dt>OK圏内率</dt><dd id="concede-rate">—</dd><dd id="concede-count" class="stat-note"></dd></div>
         <div class="panel"><dt>入らなかった球の平均残り</dt><dd id="average-leave">—</dd><dd class="stat-note">止まった位置からカップまで</dd></div>
       </dl>
+      <section class="panel stats-section" aria-labelledby="daily-heading">
+        <div class="row">
+          <div class="panel-heading"><p class="eyebrow">DAY BY DAY</p><h2 id="daily-heading">日別の傾向</h2></div>
+          <span id="daily-scope" class="note"></span>
+        </div>
+        <div class="table-wrap" tabindex="0" role="region" aria-labelledby="daily-heading">
+          <table>
+            <thead><tr><th scope="col">日付</th><th scope="col">球数</th><th scope="col">左</th><th scope="col">中央</th><th scope="col">右</th><th scope="col">ショート</th><th scope="col">オーバー</th><th scope="col">カップイン</th></tr></thead>
+            <tbody id="daily-stats"></tbody>
+          </table>
+        </div>
+        <p class="note">ブラウザの現地日付で集計します。方向は有効な角度、ショート・オーバーは有効な推定距離、カップイン率は判定対象の球が分母です。</p>
+      </section>
       <section class="panel stats-section" aria-labelledby="distance-heading">
         <div class="panel-heading"><p class="eyebrow">BY DISTANCE</p><h2 id="distance-heading">目標距離別</h2></div>
         <div class="table-wrap" tabindex="0" role="region" aria-labelledby="distance-heading">
@@ -78,6 +108,22 @@
         </div>
         <p id="direction-empty" class="note" hidden>有効な角度の記録がありません。</p>
         <p class="note">最多の角度帯を基準に、バーの長さを球数に比例させています。角度帯は上限を含み、角度エラーは除いています。</p>
+      </section>
+      <section class="panel stats-section" aria-labelledby="pace-heading">
+        <div class="panel-heading"><p class="eyebrow">DISTANCE CONTROL</p><h2 id="pace-heading">ショート・オーバーの分布</h2></div>
+        <dl class="direction-sides">
+          <div><dt>ショート</dt><dd id="pace-left">—</dd></div>
+          <div><dt>目標の±0.10 m以内</dt><dd id="pace-centre">—</dd></div>
+          <div><dt>オーバー</dt><dd id="pace-right">—</dd></div>
+        </dl>
+        <div id="pace-chart" class="table-wrap" tabindex="0" role="region" aria-labelledby="pace-heading">
+          <table class="direction-table">
+            <thead><tr><th scope="col">ショート（球）</th><th scope="col">距離差</th><th scope="col">オーバー（球）</th></tr></thead>
+            <tbody id="pace-stats"></tbody>
+          </table>
+        </div>
+        <p id="pace-empty" class="note" hidden>有効な推定距離の記録がありません。</p>
+        <p class="note">本体の推定転がり距離と目標距離の差を1 cm単位で集計します。カップインした球も推定距離で数えます。</p>
       </section>
       <section class="panel stats-section" aria-labelledby="history-heading">
         <div class="row">
