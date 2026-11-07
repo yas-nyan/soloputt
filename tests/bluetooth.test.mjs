@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { setImmediate } from "node:timers/promises";
-import { chooseDevice, ZeroPuttConnection } from "../bluetooth.mjs";
-import { lineReader, NOTIFY, parseShot, SERVICE, WRITE } from "../protocol.mjs";
+import { chooseDevice, ZeroPuttConnection } from "../site/assets/js/bluetooth.mjs";
+import { lineReader, NOTIFY, parseShot, SERVICE, WRITE } from "../site/assets/js/protocol.mjs";
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
