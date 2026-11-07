@@ -19,3 +19,15 @@ test("varies both distance and angle without changing the selected result", () =
     }
   }
 });
+
+test("keeps demo outcomes valid for small gimmes and close second putts", () => {
+  for (const target of [0.31, 0.4, 0.5, 1, 3, 8, 20]) {
+    const result = evaluatePutt(demoShot("concede", target, () => 0.99, 0.3), target, DEMO_GREEN_SPEED, 0.3);
+    assert.equal(result.outcome, "concede");
+  }
+  for (const target of [0.02, 0.1, 0.25]) {
+    for (const outcome of ["holed", "miss"]) {
+      assert.equal(evaluatePutt(demoShot(outcome, target, () => 0.9, 0), target, DEMO_GREEN_SPEED, 0).outcome, outcome);
+    }
+  }
+});

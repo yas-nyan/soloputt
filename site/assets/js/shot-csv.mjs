@@ -10,8 +10,10 @@ const ROUND_FIELDS = ["roundId", "roundStart", "roundStroke", "roundScore"];
 const PRIOR_FIELDS = [...ORIGINAL_FIELDS, ...ROUND_FIELDS];
 const SESSION_FIELDS = ["sessionId", "sessionTheme", "sessionPutter", "sessionMat"];
 const TEXT_FIELDS = new Set(SESSION_FIELDS.slice(1));
-export const CSV_FIELDS = [...PRIOR_FIELDS, ...SESSION_FIELDS];
-const OPTIONAL_NUMBERS = new Set(["greenSpeed", "leave", "model", "roundStart", "roundStroke", "roundScore"]);
+const SESSION_SCHEMA = [...PRIOR_FIELDS, ...SESSION_FIELDS];
+const SCORING_FIELDS = ["okRadius", "roundFirstLeave", "testHole"];
+export const CSV_FIELDS = [...SESSION_SCHEMA, ...SCORING_FIELDS];
+const OPTIONAL_NUMBERS = new Set(["greenSpeed", "leave", "model", "roundStart", "roundStroke", "roundScore", ...SCORING_FIELDS]);
 const DECIMAL = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i;
 
 export function shotIdentity(shot) {
@@ -68,7 +70,9 @@ function readValue(field, value) {
   const number = Number(value);
   if (!DECIMAL.test(value) || !Number.isFinite(number)) throw new Error(`${field} は数値で指定してください`);
 
-  if (field === "leave" && number < 0) throw new Error("leave は 0 以上で指定してください");
+  if (field === "okRadius" && ![0, 0.3, 0.5].includes(number)) throw new Error("okRadius は0・0.3・0.5のいずれかです");
+  if (field === "testHole" && (!Number.isInteger(number) || number < 1 || number > 20)) throw new Error("testHole は1〜20の整数です");
+  if ((field === "leave" || field === "roundFirstLeave") && number < 0) throw new Error("leave は 0 以上で指定してください");
   if (field === "model" && (!Number.isSafeInteger(number) || number < 1)) throw new Error("model は正の整数で指定してください");
   if ((field === "roundStroke" || field === "roundScore") && (!Number.isSafeInteger(number) || number < 1)) {
     throw new Error(`${field} は正の整数で指定してください`);
@@ -77,7 +81,7 @@ function readValue(field, value) {
 }
 
 function validateRound(shot) {
-  if (shot.target < 0.5 || (shot.scenario !== "finish" && shot.target > 20)) throw new Error("target が範囲外です");
+  if (shot.target <= 0 || (shot.scenario !== "finish" && (shot.target < 0.5 || shot.target > 20))) throw new Error("target が範囲外です");
   if (shot.scenario !== "finish" || shot.outcome === "unjudged") {
     if (ROUND_FIELDS.some((field) => shot[field] != null)) throw new Error("ホールアウトの打数は判定済みのホールアウトショットにだけ指定できます");
     return;
@@ -91,7 +95,7 @@ export function parseShotCSV(text) {
   const [first, ...lines] = text.replace(/^\uFEFF/, "").split(/\r\n?|\n/);
   const columns = readRow(first);
   const matches = (fields) => columns.length === fields.length && fields.every((field) => columns.includes(field));
-  if (!matches(ORIGINAL_FIELDS) && !matches(PRIOR_FIELDS) && !matches(CSV_FIELDS)) {
+  if (!matches(ORIGINAL_FIELDS) && !matches(PRIOR_FIELDS) && !matches(SESSION_SCHEMA) && !matches(CSV_FIELDS)) {
     throw new Error("CSVの列名が一致しません。SoloPuttが書き出したCSVをひな形にしてください");
   }
 
@@ -110,7 +114,7 @@ export function parseShotCSV(text) {
       for (const field of SESSION_FIELDS) {
         if (!shot[field]) delete shot[field];
       }
-      for (const field of ROUND_FIELDS) {
+      for (const field of [...ROUND_FIELDS, ...SCORING_FIELDS]) {
         if (shot[field] == null) delete shot[field];
       }
       shots.push(shot);

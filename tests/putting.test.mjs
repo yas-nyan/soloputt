@@ -52,3 +52,11 @@ test("prefixes signed angles with the direction letter", () => {
   assert.equal(formatAngle(-0.5), "L0.50");
   assert.equal(formatAngle(0), "0.00");
 });
+
+test("supports hole-out with a smaller gimme or a putt from inside fifty centimetres", () => {
+  assert.equal(evaluatePutt({ distance: 2.7, angle: 0 }, 3, 244, 0).outcome, "miss");
+  assert.equal(evaluatePutt({ distance: 2.71, angle: 0 }, 3, 244, 0.3).outcome, "concede");
+  assert.equal(evaluatePutt({ distance: 2.69, angle: 0 }, 3, 244, 0.3).outcome, "miss");
+  assert.equal(evaluatePutt({ distance: 0.2, angle: 0 }, 0.2, 244, 0).outcome, "holed");
+  assert.equal(evaluatePutt({ distance: 0.03, angle: 0 }, 0.03, 244, 0).outcome, "holed");
+});

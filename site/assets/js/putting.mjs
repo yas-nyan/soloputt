@@ -2,12 +2,11 @@ const CUP_RADIUS = 0.054;
 const STIMP_RELEASE_SPEED = 1.83;
 const CENTRE_CAPTURE_SPEED = 1.63;
 
-const MIN_TARGET = 0.5;
-const OK_DISTANCE = 0.5;
+export const DEFAULT_OK_DISTANCE = 0.5;
 export const SHOT_MODEL_VERSION = 2;
 
-export function classifyLeave(distance) {
-  return Number.isFinite(distance) && distance >= 0 && distance <= OK_DISTANCE ? "concede" : "miss";
+export function classifyLeave(distance, okDistance = DEFAULT_OK_DISTANCE) {
+  return Number.isFinite(distance) && distance >= 0 && okDistance > 0 && distance <= okDistance ? "concede" : "miss";
 }
 
 export function randomTarget(minimum, maximum, previous, random = Math.random) {
@@ -19,10 +18,10 @@ export function randomTarget(minimum, maximum, previous, random = Math.random) {
   return (omit && draw >= prior ? draw + 1 : draw) / 10;
 }
 
-export function evaluatePutt(shot, target, greenSpeed) {
+export function evaluatePutt(shot, target, greenSpeed, okDistance = DEFAULT_OK_DISTANCE) {
   if (shot.angle === 10) return { outcome: "unjudged", reason: "angle" };
   if (!(shot.distance >= 0) || !Number.isFinite(shot.distance) ||
-      !Number.isFinite(shot.angle) || !Number.isFinite(target) || target < MIN_TARGET) {
+      !Number.isFinite(shot.angle) || !Number.isFinite(target) || target <= 0) {
     return { outcome: "unjudged", reason: "measurement" };
   }
 
@@ -37,11 +36,11 @@ export function evaluatePutt(shot, target, greenSpeed) {
     return { outcome: "unjudged", reason: "green" };
   }
 
-  const outsideCup = { ...motion, outcome: classifyLeave(remaining) };
+  const outsideCup = { ...motion, outcome: classifyLeave(remaining, okDistance) };
   // Penner (2002), Eq. 23, evaluated at the first intersection with the cup circle.
   const offset = Math.abs(target * lateral);
   if (offset >= CUP_RADIUS || forward <= 0) return { ...outsideCup, reason: "line" };
-  const entry = target * forward - Math.sqrt(CUP_RADIUS ** 2 - offset ** 2);
+  const entry = Math.max(0, target * forward - Math.sqrt(CUP_RADIUS ** 2 - offset ** 2));
   const speedSquared = 2 * deceleration * (shot.distance - entry);
   if (speedSquared <= 0) return { ...outsideCup, reason: "short" };
 

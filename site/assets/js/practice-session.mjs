@@ -8,17 +8,21 @@ export function setupPracticeSession() {
   let demo = false;
 
   function render() {
-    start.disabled = demo || Boolean(current);
+    start.disabled = demo || !window.isSecureContext || Boolean(current);
     end.disabled = demo || !current;
     for (const input of inputs) input.disabled = demo || Boolean(current);
     status.textContent = demo ? "デモの球はセッションに含まれません。"
       : current ? `記録中 · ${current.sessionTheme || "テーマなし"}` : "セッションを開始すると、続けて打った球をひとまとめにできます。";
   }
 
+  function create(defaultTheme = "") {
+    const [theme, sessionPutter, sessionMat] = inputs.map((input) => input.value.trim());
+    return { sessionId: crypto.randomUUID(), sessionTheme: theme || defaultTheme, sessionPutter, sessionMat };
+  }
+
   function startSession() {
-    if (demo) return;
-    const [sessionTheme, sessionPutter, sessionMat] = inputs.map((input) => input.value.trim());
-    current = { sessionId: crypto.randomUUID(), sessionTheme, sessionPutter, sessionMat };
+    if (demo || !window.isSecureContext) return;
+    current = create();
     render();
   }
 
@@ -34,8 +38,7 @@ export function setupPracticeSession() {
   end.addEventListener("click", stopSession);
   render();
   return {
-    start: startSession,
-    stop: stopSession,
+    create,
     get current() { return current; },
     setDemo(value) { demo = value; render(); },
   };
