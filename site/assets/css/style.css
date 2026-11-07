@@ -3,7 +3,6 @@
   font: 16px/1.55 system-ui, -apple-system, sans-serif;
   color: #20392d;
   background: #f5f5ed;
-  --forest: #183c2c;
   --text-muted: #506458;
   --line: #dce4d8;
   --paper: #fdfdf7;
@@ -22,9 +21,7 @@ a { color: inherit; text-underline-offset: .22em; }
 .header-inner, main, .site-footer { width: min(100% - 2.5rem, 67rem); margin-inline: auto; }
 .header-inner { min-height: 4.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .wordmark { display: inline-flex; gap: .65rem; align-items: center; font-size: 1.3rem; font-weight: 850; letter-spacing: -.055em; text-decoration: none; }
-.brand-mark { width: 1.9rem; height: 1.9rem; border-radius: 50%; background: var(--forest); position: relative; }
-.brand-mark::before { content: ""; position: absolute; width: .38rem; height: .38rem; border-radius: 50%; background: var(--lime); left: .72rem; top: .4rem; }
-.brand-mark::after { content: ""; position: absolute; width: .93rem; height: .36rem; border: 1px solid var(--lime); border-radius: 50%; left: .49rem; bottom: .42rem; }
+.brand-mark { flex: 0 0 1.9rem; height: 1.9rem; background: url("../images/soloputt-mark.svg") center / contain no-repeat; }
 nav { display: flex; align-items: center; gap: .25rem; }
 nav a { padding: .5rem .72rem; border-radius: .5rem; font-size: .87rem; font-weight: 700; text-decoration: none; }
 nav a:hover, nav a[aria-current="page"] { background: #e6eddf; }

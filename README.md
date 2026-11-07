@@ -1,5 +1,7 @@
 # SoloPutt
 
+<img src="./site/assets/images/soloputt-mark.svg" alt="SoloPutt ロゴ" width="64" height="64">
+
 ZeroPuttの非公式Webクライアントです。ブラウザで機器に接続して、固定距離または範囲を指定したランダム距離でパッティングを練習できます。平坦なグリーンの物理モデルでカップインを判定し、軌道と残り距離を表示します。
 
 ## 試し方
