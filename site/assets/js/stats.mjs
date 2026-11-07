@@ -1,6 +1,7 @@
 import { createDemoReader } from "./demo-stats.mjs";
 import { setupCSVTools } from "./csv-tools.mjs";
 import { formatAngle, OUTCOME_LABELS } from "./putting.mjs";
+import { setupShotDeletion } from "./shot-deletion.mjs";
 import { readStatsPage } from "./shot-store.mjs";
 import { dateInputValue, statsDateRange } from "./stats-dates.mjs";
 import { ANGLE_BANDS, PACE_BANDS, combineStats } from "./stats-data.mjs";
@@ -17,6 +18,7 @@ const older = field("history-older");
 const dateTime = new Intl.DateTimeFormat("ja-JP", { dateStyle: "short", timeStyle: "short" });
 const date = new Intl.DateTimeFormat("ja-JP", { dateStyle: "medium" });
 let page;
+let pageOptions;
 let selectedRange;
 let selectedTotal;
 let requestId = 0;
@@ -149,18 +151,19 @@ function renderStats(stats, daily, dateRange) {
 function renderHistory(history) {
   field("history-count").textContent = `このページ ${history.entries.length} / 全 ${selectedTotal} 球`;
   const scenarios = { fixed: "固定", random: "ランダム", finish: "ホールアウト" };
-  renderRows("history", history.entries.map(({ shot }) => [
+  renderRows("history", history.entries.map(({ key, shot }) => [
     dateTime.format(shot.time), scenarios[shot.scenario],
     `${shot.target.toFixed(shot.scenario === "finish" ? 2 : 1)} m`, metric(OUTCOME_LABELS[shot.outcome], shot.outcome), `${shot.distance.toFixed(2)} m`,
     shot.angle === 10 ? "エラー" : `${formatAngle(shot.angle)}°`,
     `${shot.speed.toFixed(2)} m/s`, shot.leave === null ? "—" : `${shot.leave.toFixed(2)} m`,
     shot.roundScore != null ? `${shot.roundScore}打で完了` : shot.roundStroke ? `${shot.roundStroke}打目` : "—",
+    ...(demoReader ? [] : [deleteButton(key.id, `${dateTime.format(shot.time)}・目標${shot.target.toFixed(2)} m`)]),
   ]));
   newer.disabled = !history.hasNewer;
   older.disabled = !history.hasOlder;
 }
 
-async function load(options) {
+async function load(options, refreshStats = !options) {
   const id = ++requestId;
   const scenario = filter.value;
   newer.disabled = true;
@@ -178,16 +181,18 @@ async function load(options) {
 
   try {
     const readPage = demoReader ?? readStatsPage;
-    const result = await readPage(scenario, { ...options, dateRange, includeStats: !options });
+    const result = await readPage(scenario, { ...options, dateRange, includeStats: refreshStats });
     if (id !== requestId) return;
+    if (options && !result.entries.length) return load();
     page = result;
+    pageOptions = options;
     selectedRange = dateRange;
-    if (!options) renderStats(combineStats(result.summaries), result.daily, dateRange);
+    if (refreshStats) renderStats(combineStats(result.summaries), result.daily, dateRange);
     renderHistory(result);
     if (options) {
       const heading = field("history-heading");
       heading.focus({ preventScroll: true });
-      heading.scrollIntoView({ block: "start" });
+      if (!refreshStats) heading.scrollIntoView({ block: "start" });
     }
   } catch {
     if (id !== requestId) return;
@@ -221,7 +226,11 @@ field("demo-toggle").addEventListener("click", (event) => {
   event.currentTarget.textContent = demoReader ? "実打の記録に戻る" : "サンプル統計を見る";
   field("demo-status").textContent = demoReader ? "サンプル1,000球を表示中" : "実打の記録を表示中";
   field("csv-tools").hidden = Boolean(demoReader);
+  field("delete-tools").hidden = Boolean(demoReader);
+  field("history-delete-heading").hidden = Boolean(demoReader);
   load();
 });
 
 setupCSVTools(() => load());
+
+const deleteButton = setupShotDeletion((stayOnPage) => load(stayOnPage ? pageOptions : undefined, true));

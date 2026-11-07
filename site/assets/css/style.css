@@ -125,7 +125,7 @@ details .note { margin-top: .5rem; }
 .stat-cards dt { color: var(--text-muted); }
 .stat-cards dd { font-size: clamp(1.2rem, 4vw, 2.5rem); }
 .stat-cards .stat-note { font-size: .75rem; font-weight: 400; color: var(--text-muted); }
-.stats-section, .csv-tools, .demo-tools { margin-bottom: .7rem; }
+.stats-section, .csv-tools, .demo-tools, .delete-tools { margin-bottom: .7rem; }
 #csv-status:not(:empty) { margin-top: .4rem; }
 #csv-status[data-error="true"] { color: #8a4524; }
 .table-wrap { margin-block: .55rem .4rem; overflow-x: auto; }
@@ -236,3 +236,9 @@ tbody tr:hover { background: #eaf0e4; }
 .practice-demo .actions { margin-top: .45rem; }
 .practice-demo button[data-tone] { border-color: var(--tone-bg); background: var(--tone-bg); color: var(--tone-ink); }
 .practice-demo button[data-tone]:not(:disabled):hover { filter: brightness(1.08); }
+
+.delete-range { display: flex; flex-wrap: wrap; align-items: end; gap: .5rem; margin-block: .7rem; }
+button.secondary.danger-button { color: #873c34; border-color: #d9b8b2; }
+button.secondary.danger-button:not(:disabled):hover { background: #f8e9e5; }
+#delete-status:not(:empty) { margin-top: .45rem; }
+#delete-status[data-error="true"] { color: #873c34; }

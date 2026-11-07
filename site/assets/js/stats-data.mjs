@@ -31,12 +31,14 @@ export function createStats() {
   };
 }
 
-function countShot(totals, shot) {
-  totals.total++;
-  if (shot.outcome === "holed") totals.holed++;
-  if (shot.outcome === "concede") totals.conceded++;
-  if (shot.outcome === "miss") totals.missed++;
-  if (shot.outcome === "concede" || shot.outcome === "miss") totals.leave += shot.leave;
+function countShot(totals, shot, delta = 1) {
+  totals.total += delta;
+  if (shot.outcome === "holed") totals.holed += delta;
+  if (shot.outcome === "concede") totals.conceded += delta;
+  if (shot.outcome === "miss") totals.missed += delta;
+  if (shot.outcome === "concede" || shot.outcome === "miss") {
+    totals.leave = totals.conceded || totals.missed ? totals.leave + shot.leave * delta : 0;
+  }
 }
 
 function angleSide(angle) {
@@ -57,31 +59,40 @@ function paceSide(difference) {
   return difference <= 0.3 ? "centre" : "right";
 }
 
-function countBand(stats, side, magnitude, bands) {
+function countBand(stats, side, magnitude, bands, delta) {
   if (!side) return;
   if (side === "centre") {
-    stats.centre++;
+    stats.centre += delta;
     return;
   }
-  stats[side][bands.findIndex(({ maximum }) => magnitude <= maximum)]++;
+  stats[side][bands.findIndex(({ maximum }) => magnitude <= maximum)] += delta;
 }
 
-export function addShot(stats, shot) {
-  countShot(stats, shot);
+function adjustShot(stats, shot, delta) {
+  countShot(stats, shot, delta);
   if (shot.scenario === "finish" && shot.roundScore != null) {
-    stats.finish.completed++;
-    stats.finish.strokes += shot.roundScore;
+    stats.finish.completed += delta;
+    stats.finish.strokes += shot.roundScore * delta;
     const band = shot.roundScore === 1 ? "one" : shot.roundScore === 2 ? "two" : "threePlus";
-    stats.finish[band]++;
-    if (shot.outcome === "concede") stats.finish.conceded++;
+    stats.finish[band] += delta;
+    if (shot.outcome === "concede") stats.finish.conceded += delta;
   }
   const band = Math.floor(shot.target * 2);
   stats.distances[band] ??= counts();
-  countShot(stats.distances[band], shot);
+  countShot(stats.distances[band], shot, delta);
+  if (!stats.distances[band].total) delete stats.distances[band];
 
-  countBand(stats, angleSide(shot.angle), Math.abs(shot.angle), ANGLE_BANDS);
+  countBand(stats, angleSide(shot.angle), Math.abs(shot.angle), ANGLE_BANDS, delta);
   const difference = paceDifference(shot);
-  countBand(stats.pace, paceSide(difference), Math.abs(difference), PACE_BANDS);
+  countBand(stats.pace, paceSide(difference), Math.abs(difference), PACE_BANDS, delta);
+}
+
+export function addShot(stats, shot) {
+  adjustShot(stats, shot, 1);
+}
+
+export function removeShot(stats, shot) {
+  adjustShot(stats, shot, -1);
 }
 
 export function createDailyStats() {

@@ -1,6 +1,6 @@
 import { shotIdentity } from "./shot-csv.mjs";
 import { localDay } from "./stats-dates.mjs";
-import { addDailyShot, addShot, createDailyStats, createStats } from "./stats-data.mjs";
+import { addDailyShot, addShot, createDailyStats, createStats, removeShot } from "./stats-data.mjs";
 
 const SHOTS = "shots";
 const STATS = "stats";
@@ -127,6 +127,54 @@ export function importShots(shots) {
       };
     }
     return () => ({ added: added.length, skipped: shots.length - added.length });
+  });
+}
+
+export function deleteShots({ all = false, id, dateRange }) {
+  return access("readwrite", (transaction) => {
+    const shots = transaction.objectStore(SHOTS);
+    const stats = transaction.objectStore(STATS);
+    if (all) {
+      const count = shots.count();
+      shots.clear();
+      stats.clear();
+      return () => count.result;
+    }
+
+    const request = id !== undefined ? shots.openCursor(IDBKeyRange.only(id))
+      : shots.index(TIME).openCursor(IDBKeyRange.bound(dateRange.start, dateRange.end, false, true));
+    const summaries = new Map();
+    let removed = 0;
+
+    function remove(cursor, summary) {
+      removeShot(summary, cursor.value);
+      cursor.delete();
+      removed++;
+      cursor.continue();
+    }
+
+    request.onsuccess = () => {
+      const cursor = request.result;
+      if (!cursor) {
+        for (const [scenario, summary] of summaries) {
+          if (summary.total) stats.put(summary, scenario);
+          else stats.delete(scenario);
+        }
+        return;
+      }
+
+      const { scenario } = cursor.value;
+      if (summaries.has(scenario)) {
+        remove(cursor, summaries.get(scenario));
+        return;
+      }
+      const lookup = stats.get(scenario);
+      lookup.onsuccess = () => {
+        summaries.set(scenario, lookup.result);
+        remove(cursor, lookup.result);
+      };
+    };
+    return () => removed;
   });
 }
 

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { addDailyShot, addShot, combineStats, createDailyStats, createStats } from "../site/assets/js/stats-data.mjs";
+import { addDailyShot, addShot, combineStats, createDailyStats, createStats, removeShot } from "../site/assets/js/stats-data.mjs";
 
 test("groups targets in half-metre ranges and combines scenario totals", () => {
   const fixed = createStats();
@@ -44,4 +44,18 @@ test("counts short, just and over separately from cup-ins", () => {
   }
   assert.deepEqual(combineStats([stats]).pace, { centre: 2, left: [1, 0, 0, 0], right: [0, 1, 0, 0] });
   assert.deepEqual([daily.short, daily.onPace, daily.over, daily.holed], [1, 2, 1, 1]);
+});
+
+test("removing a shot reverses each aggregate it contributed to", () => {
+  const kept = { scenario: "fixed", target: 3, distance: 3, angle: 0, outcome: "holed", leave: 0 };
+  const removed = [
+    { scenario: "fixed", target: 3, distance: 2.3, angle: -1, outcome: "miss", leave: 0.7 },
+    { scenario: "finish", target: 5, distance: 5.31, angle: 1, outcome: "concede", leave: 0.4, roundScore: 3 },
+  ];
+  const expected = createStats();
+  const actual = createStats();
+  addShot(expected, kept);
+  for (const shot of [kept, ...removed]) addShot(actual, shot);
+  for (const shot of removed) removeShot(actual, shot);
+  assert.deepEqual(actual, expected);
 });

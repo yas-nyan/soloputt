@@ -70,6 +70,19 @@
       </div>
       <p id="csv-status" class="note" role="status"></p>
     </section>
+    <section id="delete-tools" class="panel delete-tools" aria-label="履歴の削除">
+      <details>
+        <summary>履歴を削除</summary>
+        <p class="note">指定した日付の開始日から終了日までを削除します。練習メニューの絞り込みに関係なく、全メニューが対象です。</p>
+        <form id="delete-range" class="delete-range">
+          <label class="stats-filter" for="delete-from">開始日<input id="delete-from" type="date" required></label>
+          <label class="stats-filter" for="delete-to">終了日<input id="delete-to" type="date" required></label>
+          <button type="submit" class="secondary danger-button" data-delete-shot>期間内を削除</button>
+        </form>
+        <button id="delete-all" class="secondary danger-button" type="button" data-delete-shot>全履歴を削除</button>
+      </details>
+      <p id="delete-status" class="note" role="status"></p>
+    </section>
     <p id="stats-status" class="note banner" role="status">履歴を読み込み中…</p>
     <div id="stats-content" hidden>
       <dl class="stat-cards">
@@ -154,7 +167,7 @@
         </div>
         <div class="table-wrap" tabindex="0" role="region" aria-labelledby="history-heading">
           <table>
-            <thead><tr><th scope="col">日時</th><th scope="col">練習</th><th scope="col">目標</th><th scope="col">結果</th><th scope="col">推定距離</th><th scope="col">方向</th><th scope="col">表示速度</th><th scope="col">残り</th><th scope="col">ホールアウト</th></tr></thead>
+            <thead><tr><th scope="col">日時</th><th scope="col">練習</th><th scope="col">目標</th><th scope="col">結果</th><th scope="col">推定距離</th><th scope="col">方向</th><th scope="col">表示速度</th><th scope="col">残り</th><th scope="col">ホールアウト</th><th id="history-delete-heading" scope="col">操作</th></tr></thead>
             <tbody id="history"></tbody>
           </table>
         </div>
