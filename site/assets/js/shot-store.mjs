@@ -1,16 +1,22 @@
 import { classifyLeave } from "./putting.mjs";
+import { shotIdentity } from "./shot-csv.mjs";
 import { addShot, createStats } from "./stats-data.mjs";
 
 const SHOTS = "shots";
 const STATS = "stats";
-const SCENARIO = "scenario";
+const TIME = "time";
+const SCENARIO_TIME = "scenario-time";
+const MAX_TIME = 8_640_000_000_000_000;
 let database;
 
 function upgrade(request, oldVersion) {
   const db = request.result;
   const shots = oldVersion === 0 ? db.createObjectStore(SHOTS, { autoIncrement: true })
     : request.transaction.objectStore(SHOTS);
-  shots.createIndex(SCENARIO, SCENARIO);
+  if (shots.indexNames.contains("scenario")) shots.deleteIndex("scenario");
+  shots.createIndex(TIME, TIME);
+  shots.createIndex(SCENARIO_TIME, ["scenario", TIME]);
+  if (oldVersion >= 3) return;
   const stats = db.createObjectStore(STATS);
   if (oldVersion === 0) return;
 
@@ -35,7 +41,7 @@ function upgrade(request, oldVersion) {
 
 function openDatabase() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("soloputt", 3);
+    const request = indexedDB.open("soloputt", 4);
     request.onupgradeneeded = (event) => upgrade(request, event.oldVersion);
     request.onerror = () => reject(request.error);
     request.onsuccess = () => {
@@ -68,47 +74,105 @@ async function access(mode, operate) {
   });
 }
 
-export function saveShot(shot) {
-  return access("readwrite", (transaction) => {
-    const stats = transaction.objectStore(STATS);
-    const summaryRequest = stats.get(shot.scenario);
+function addShots(transaction, shots) {
+  const stats = transaction.objectStore(STATS);
+  const byScenario = new Map();
+  for (const shot of shots) {
+    if (!byScenario.has(shot.scenario)) byScenario.set(shot.scenario, []);
+    byScenario.get(shot.scenario).push(shot);
+  }
+  for (const [scenario, records] of byScenario) {
+    const summaryRequest = stats.get(scenario);
     summaryRequest.onsuccess = () => {
       const summary = summaryRequest.result ?? createStats();
-      addShot(summary, shot);
-      stats.put(summary, shot.scenario);
+      for (const shot of records) addShot(summary, shot);
+      stats.put(summary, scenario);
     };
-    const saved = transaction.objectStore(SHOTS).add(shot);
+  }
+  const store = transaction.objectStore(SHOTS);
+  return shots.map((shot) => store.add(shot));
+}
+
+export function saveShot(shot) {
+  return access("readwrite", (transaction) => {
+    const [saved] = addShots(transaction, [shot]);
     return () => saved.result;
+  });
+}
+
+export function importShots(shots) {
+  return access("readwrite", (transaction) => {
+    const byTime = new Map();
+    for (const shot of shots) {
+      if (!byTime.has(shot.time)) byTime.set(shot.time, []);
+      byTime.get(shot.time).push(shot);
+    }
+
+    const index = transaction.objectStore(SHOTS).index(TIME);
+    const added = [];
+    let pending = byTime.size;
+    for (const [time, records] of byTime) {
+      const lookup = index.getAll(time);
+      lookup.onsuccess = () => {
+        const seen = new Set(lookup.result.map(shotIdentity));
+        for (const shot of records) {
+          const identity = shotIdentity(shot);
+          if (seen.has(identity)) continue;
+          seen.add(identity);
+          added.push(shot);
+        }
+        if (--pending === 0) addShots(transaction, added);
+      };
+    }
+    return () => ({ added: added.length, skipped: shots.length - added.length });
+  });
+}
+
+export function forEachShot(visit) {
+  return access("readonly", (transaction) => {
+    const request = transaction.objectStore(SHOTS).index(TIME).openCursor();
+    request.onsuccess = () => {
+      const cursor = request.result;
+      if (!cursor) return;
+      visit(cursor.value);
+      cursor.continue();
+    };
+    return () => undefined;
   });
 }
 
 function readHistory(shots, scenario, boundary, newer, pageSize) {
   const filtered = scenario !== "all";
   const direction = newer ? "next" : "prev";
-  const source = filtered ? shots.index(SCENARIO) : shots;
-  const range = filtered ? IDBKeyRange.only(scenario) : boundary === null ? null
-    : newer ? IDBKeyRange.lowerBound(boundary, true) : IDBKeyRange.upperBound(boundary, true);
+  const index = shots.index(filtered ? SCENARIO_TIME : TIME);
+  const indexKey = (time) => filtered ? [scenario, time] : time;
+  const lower = newer && boundary ? boundary.time : -MAX_TIME;
+  const upper = !newer && boundary ? boundary.time : MAX_TIME;
+  const range = IDBKeyRange.bound(indexKey(lower), indexKey(upper));
   const entries = [];
   let more = false;
-  const request = source.openCursor(range, direction);
+  const request = index.openCursor(range, direction);
   request.onsuccess = () => {
     const cursor = request.result;
     if (!cursor) return;
-    const key = cursor.primaryKey;
-    // A filtered cursor is ordered by primary key within the chosen scenario.
-    if (filtered && boundary !== null && (newer ? key < boundary : key > boundary)) {
-      cursor.continuePrimaryKey(scenario, boundary);
-      return;
-    }
-    if (filtered && key === boundary) {
-      cursor.continue();
-      return;
+    const time = filtered ? cursor.key[1] : cursor.key;
+    const id = cursor.primaryKey;
+    // Timestamps may tie. Use the primary key to resume within that group.
+    if (boundary && time === boundary.time) {
+      if (newer ? id < boundary.id : id > boundary.id) {
+        cursor.continuePrimaryKey(cursor.key, boundary.id);
+        return;
+      }
+      if (id === boundary.id) {
+        cursor.continue();
+        return;
+      }
     }
     if (entries.length === pageSize) {
       more = true;
       return;
     }
-    entries.push({ key, shot: cursor.value });
+    entries.push({ key: { time, id }, shot: cursor.value });
     cursor.continue();
   };
   return () => ({

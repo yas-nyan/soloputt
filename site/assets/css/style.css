@@ -123,7 +123,9 @@ details .note { margin-top: .5rem; }
 .stat-cards dt { color: var(--text-muted); }
 .stat-cards dd { font-size: clamp(1.2rem, 4vw, 2.5rem); }
 .stat-cards .stat-note { font-size: .75rem; font-weight: 400; color: var(--text-muted); }
-.stats-section { margin-bottom: .7rem; }
+.stats-section, .csv-tools { margin-bottom: .7rem; }
+#csv-status:not(:empty) { margin-top: .4rem; }
+#csv-status[data-error="true"] { color: #8a4524; }
 .table-wrap { margin-block: .55rem .4rem; overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; white-space: nowrap; font-size: .87rem; font-variant-numeric: tabular-nums; }
 th, td { text-align: left; border-bottom: 1px solid var(--line); padding: .53rem .65rem; }
@@ -132,16 +134,16 @@ th { background: #e8eee1; font-size: .78rem; }
 .direction-sides { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: .4rem; margin-top: .75rem; text-align: center; }
 .direction-sides div { padding: .4rem .25rem; border-radius: .45rem; background: #edf1e7; }
 .direction-sides dd { font-size: .88rem; }
+.direction-count { display: block; font-size: .73rem; font-weight: 600; }
 .direction-table { table-layout: fixed; }
 .direction-table th, .direction-table td { text-align: center; padding-inline: .4rem; }
-.direction-table th:nth-child(2) { width: 6rem; }
-.direction-bar { display: flex; align-items: center; gap: .25rem; }
-.direction-bar.right { flex-direction: row-reverse; }
-.direction-bar > span:first-child { flex: 0 0 2.6rem; }
-.direction-track { display: flex; flex: 1; justify-content: flex-end; }
-.direction-bar.right .direction-track { justify-content: flex-start; }
-.direction-track > span { height: .72rem; border-radius: .22rem; background: #4d755e; }
-.direction-bar.right .direction-track > span { background: #876647; }
+.direction-table th:nth-child(2) { width: clamp(4.5rem, 15vw, 6rem); }
+.direction-bar { display: grid; grid-template-columns: clamp(1.6rem, 5vw, 2.6rem) minmax(0, 1fr); align-items: center; gap: .25rem; }
+.direction-bar.right { grid-template-columns: minmax(0, 1fr) clamp(1.6rem, 5vw, 2.6rem); }
+.direction-track { position: relative; display: block; height: .85rem; border-radius: .25rem; background: #e8eee1; }
+.direction-bar.right .direction-track { grid-area: 1 / 1; }
+.direction-track > span { position: absolute; inset-block: 0; inset-inline-end: 0; border-radius: inherit; background: #4d755e; }
+.direction-bar.right .direction-track > span { inset-inline: 0 auto; background: #876647; }
 
 .article p { color: var(--text-muted); margin-top: .65rem; }
 .article a { color: var(--green); font-weight: 700; }

@@ -1,3 +1,4 @@
+import { setupCSVTools } from "./csv-tools.mjs";
 import { formatAngle, OUTCOME_LABELS } from "./putting.mjs";
 import { readStatsPage } from "./shot-store.mjs";
 import { ANGLE_BANDS, combineStats } from "./stats-data.mjs";
@@ -42,7 +43,10 @@ function renderDirection(stats) {
   const counts = [left, stats.centre, right];
   ["left", "centre", "right"].forEach((side, index) => {
     const count = counts[index];
-    field(`direction-${side}`).textContent = total ? `${rate(count, total)}（${count}球）` : "—";
+    const detail = document.createElement("span");
+    detail.className = "direction-count";
+    if (total) detail.textContent = `${count}球`;
+    field(`direction-${side}`).replaceChildren(rate(count, total), detail);
   });
   const maximum = Math.max(1, ...stats.left, ...stats.right);
   function bar(count, side) {
@@ -131,3 +135,5 @@ newer.addEventListener("click", () => load({ boundary: page.entries[0].key, newe
 older.addEventListener("click", () => load({ boundary: page.entries.at(-1).key }));
 filter.addEventListener("change", () => load());
 window.addEventListener("pageshow", () => load());
+
+setupCSVTools(() => load());

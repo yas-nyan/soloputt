@@ -31,6 +31,20 @@
         </select>
       </label>
     </section>
+    <section class="panel csv-tools" aria-labelledby="csv-heading">
+      <div class="row">
+        <div>
+          <h2 id="csv-heading">履歴のCSV</h2>
+          <p class="note">全履歴を書き出せます。取り込みは既存の履歴に追加し、同じ内容のショットはスキップします。</p>
+        </div>
+        <div class="actions">
+          <input id="csv-file" type="file" accept=".csv,text/csv" hidden>
+          <button id="csv-import" class="secondary" type="button">CSVを取り込む</button>
+          <button id="csv-export" class="secondary" type="button">CSVを書き出す</button>
+        </div>
+      </div>
+      <p id="csv-status" class="note" role="status"></p>
+    </section>
     <p id="stats-status" class="note banner" role="status">履歴を読み込み中…</p>
     <div id="stats-content" hidden>
       <dl class="stat-cards">
@@ -63,7 +77,7 @@
           </table>
         </div>
         <p id="direction-empty" class="note" hidden>有効な角度の記録がありません。</p>
-        <p class="note">バーの長さは球数に比例します。角度帯は上限を含み、角度エラーは除いています。</p>
+        <p class="note">最多の角度帯を基準に、バーの長さを球数に比例させています。角度帯は上限を含み、角度エラーは除いています。</p>
       </section>
       <section class="panel stats-section" aria-labelledby="history-heading">
         <div class="row">
