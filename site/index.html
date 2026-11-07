@@ -41,6 +41,7 @@
         <span class="console-status" id="round-status" role="status">接続待ち</span>
       </div>
       <p id="green-shot-summary" class="green-shot-summary" role="status" hidden></p>
+      <p id="test-progress" class="round-progress test-progress" role="status" hidden></p>
       <div class="console-body">
         <div class="course" id="practice-course">
           <svg viewBox="0 0 520 278" role="img" aria-label="パットの軌道を示すグリーンの模式図">
@@ -72,7 +73,6 @@
           <div class="console-detail"><dt>グリーン速度</dt><dd id="green-speed">—</dd></div>
         </dl>
       </div>
-      <p id="test-progress" class="round-progress" role="status" hidden></p>
       <p id="round-progress" class="round-progress" hidden></p>
       <p id="round-notice" class="round-notice" role="status"></p>
       <fieldset id="demo-controls" class="practice-demo" hidden>
@@ -95,12 +95,14 @@
             <label><input type="radio" name="scenario" value="fixed" checked><span>固定距離</span></label>
             <label><input type="radio" name="scenario" value="random"><span>ランダム</span></label>
             <label><input type="radio" name="scenario" value="finish"><span>ホールアウト</span></label>
+            <label><input type="radio" name="scenario" value="test"><span>20ホール</span></label>
           </fieldset>
           <fieldset id="finish-distance-options" class="finish-distance-options" hidden>
-            <legend>開始距離の選び方</legend>
-            <label><input type="radio" name="finish-distance" value="fixed" checked> 固定</label>
-            <label><input type="radio" name="finish-distance" value="random"> ランダム</label>
-            <label><input type="checkbox" id="test-twenty" name="test-twenty"> 実戦テスト20ホール</label>
+            <legend>ホールアウトの設定</legend>
+            <div id="finish-start-choice">
+              <label><input type="radio" name="finish-distance" value="fixed" checked> 固定</label>
+              <label><input type="radio" name="finish-distance" value="random"> ランダム</label>
+            </div>
             <label for="ok-distance">OKの距離
               <select id="ok-distance" name="ok-distance">
                 <option value="0">なし</option><option value="0.3">30 cm</option><option value="0.5" selected>50 cm</option>
@@ -115,8 +117,8 @@
             <label>下限 <input id="distance-min" type="number" min="0.5" max="20" step="0.1" value="0.5" inputmode="decimal" required disabled> m</label>
             <label>上限 <input id="distance-max" type="number" min="0.5" max="20" step="0.1" value="3.0" inputmode="decimal" required disabled> m</label>
           </div>
-          <p class="note">ランダムは指定範囲から0.1 m刻みで選びます。ホールアウトはカップインまたは設定したOKまで続けます。実戦テストはランダム距離を20ホール回り、別のセッションに記録します。</p>
-          <button type="submit" class="apply-target">目標を適用</button>
+          <p class="note">ランダムは指定範囲から0.1 m刻みで選びます。ホールアウトはカップインまたは設定したOKまで続けます。20ホールはランダム距離で回り、別のセッションに記録します。</p>
+          <button id="apply-practice" type="submit" class="apply-target">目標を適用</button>
         </form>
       </section>
 

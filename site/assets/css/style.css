@@ -93,7 +93,7 @@ dd { font-weight: 800; font-variant-numeric: tabular-nums; }
 .panel { min-width: 0; border: 1px solid var(--line); border-radius: .9rem; background: var(--paper); padding: 1rem 1.1rem; }
 .panel-heading h2 { margin-top: .12rem; }
 .scenario-control { padding: 0; margin: .8rem 0 .6rem; border: 0; display: flex; gap: .32rem; }
-.scenario-control label { display: flex; align-items: center; gap: .35rem; flex: 1; min-height: 44px; padding: .4rem .5rem; border-radius: .5rem; border: 1px solid var(--line); cursor: pointer; font-size: .87rem; font-weight: 700; }
+.scenario-control label { min-width: 0; display: flex; align-items: center; gap: .35rem; flex: 1; min-height: 44px; padding: .4rem .5rem; border-radius: .5rem; border: 1px solid var(--line); cursor: pointer; font-size: .87rem; font-weight: 700; }
 .scenario-control label:has(:checked) { background: #e9f0df; border-color: #9ab497; }
 .scenario-control input { margin: 0; accent-color: var(--green); }
 .distance-control { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem 1rem; margin-bottom: .45rem; font-size: .88rem; }
@@ -189,6 +189,7 @@ tbody tr:hover { background: #eaf0e4; }
   .console-values > div { padding: .45rem .36rem; }
   .console-values dt { font-size: .68rem; }
   .about-grid { grid-template-columns: 1fr; }
+  .scenario-control { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stat-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .3rem; }
   .stat-cards .panel { padding: .5rem .4rem; }
 }
@@ -226,6 +227,7 @@ tbody tr:hover { background: #eaf0e4; }
 }
 
 .round-progress { margin-top: .7rem; color: #cbe3b7; font-size: .85rem; font-weight: 700; }
+.test-progress { margin-top: 0; margin-bottom: .6rem; }
 .round-notice:not(:empty) { margin-top: .35rem; color: #ffe0aa; font-size: .82rem; }
 .shot-round { margin-top: .3rem; font-size: .88rem; font-weight: 750; }
 .finish-totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.3rem, 1fr)); gap: .4rem; margin-block: .7rem .45rem; }

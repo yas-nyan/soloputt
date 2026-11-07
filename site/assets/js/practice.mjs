@@ -23,7 +23,6 @@ export function setupPractice() {
   const session = setupPracticeSession();
   const distance = field("target-range");
   const minimum = field("distance-min");
-  const testOption = field("test-twenty");
   const maximum = field("distance-max");
   const ball = field("ball");
   const trail = field("trail");
@@ -49,6 +48,8 @@ export function setupPractice() {
   let okDistance = DEFAULT_OK_DISTANCE;
   let testSelected = false;
   let test;
+  let draftMode = "practice";
+  const rangeDrafts = { practice: [minimum.value, maximum.value], test: ["1.5", "8.0"] };
 
   function hideFeedback() {
     feedback.hidden = true;
@@ -70,25 +71,31 @@ export function setupPractice() {
     }
   }
 
+  function showTestProgress() {
+    const progress = field("test-progress");
+    progress.hidden = !test;
+    if (!test) return;
+    const completed = test.scores.length;
+    const total = test.scores.reduce((sum, score) => sum + score, 0);
+    progress.textContent = completed === 20
+      ? `20ホール完了 · 合計 ${total} 打 · 平均 ${(total / 20).toFixed(2)} 打 · 3パット以上 ${test.scores.filter((score) => score >= 3).length} 回`
+      : `${completed + 1}/20 H · このホール${round.strokes}打 · 完了分${total}打`;
+  }
+
   function showTarget() {
     hideFeedback();
     if (demo) setDemoBusy(false);
     field("target").textContent = target.toFixed(round?.strokes ? 2 : 1);
     field("remaining").textContent = target.toFixed(2);
     const range = `${distanceRange.min.toFixed(1)}〜${distanceRange.max.toFixed(1)} m`;
-    field("scenario-label").textContent = round ? randomDistance ? `ホールアウト · ${range}` : "ホールアウト"
+    const roundLabel = test ? "20ホール" : "ホールアウト";
+    field("scenario-label").textContent = round ? randomDistance ? `${roundLabel} · ${range}` : roundLabel
       : randomDistance ? `${range} ランダム` : "固定距離";
     field("round-progress").hidden = !round;
     if (round) field("round-progress").textContent = `開始 ${round.start.toFixed(1)} m · 次は ${round.strokes + 1} 打目`;
     const completed = test?.scores.length === 20;
     field("round-status").textContent = completed ? "テスト完了" : ready ? "準備完了" : "接続待ち";
-    field("test-progress").hidden = !test;
-    if (test) {
-      const total = test.scores.reduce((sum, score) => sum + score, 0);
-      field("test-progress").textContent = completed
-        ? `20ホール完了 · 合計 ${total} 打 · 平均 ${(total / 20).toFixed(2)} 打 · 3パット以上 ${test.scores.filter((score) => score >= 3).length} 回`
-        : `ホール ${test.scores.length + 1} / 20 · ここまで ${total} 打`;
-    }
+    showTestProgress();
     if (completed) field("round-progress").hidden = true;
     ball.setAttribute("cx", BALL_X);
     ball.setAttribute("cy", BALL_Y);
@@ -124,19 +131,27 @@ export function setupPractice() {
 
   function usesRandomDistance(selection) {
     const mode = selection.get("scenario");
-    return mode === "random" || (mode === "finish" &&
-      (testOption.checked || selection.get("finish-distance") === "random"));
+    return mode === "random" || mode === "test" || (mode === "finish" && selection.get("finish-distance") === "random");
   }
 
   function updateDistanceFields() {
     const selection = new FormData(form);
-    const finish = selection.get("scenario") === "finish";
+    const mode = selection.get("scenario");
+    const testing = mode === "test";
+    const finish = mode === "finish" || testing;
     const random = usesRandomDistance(selection);
+    const nextDraftMode = testing ? "test" : "practice";
+    if (draftMode !== nextDraftMode) {
+      rangeDrafts[draftMode] = [minimum.value, maximum.value];
+      draftMode = nextDraftMode;
+      [minimum.value, maximum.value] = rangeDrafts[draftMode];
+    }
     field("finish-distance-options").hidden = !finish;
-    for (const input of form.querySelectorAll('input[name="finish-distance"]')) input.disabled = testOption.checked;
+    field("finish-start-choice").hidden = testing;
     field("single-distance").hidden = random;
     field("random-range").hidden = !random;
     field("target-label").textContent = finish ? "開始距離" : "目標距離";
+    field("apply-practice").textContent = testing ? "20ホールを開始" : "目標を適用";
     distance.disabled = random;
     minimum.disabled = !random;
     maximum.disabled = !random;
@@ -144,11 +159,7 @@ export function setupPractice() {
   }
 
   form.addEventListener("change", (event) => {
-    if (event.target === testOption && testOption.checked) {
-      minimum.value = "1.5";
-      maximum.value = "8.0";
-    }
-    if (["scenario", "finish-distance", "test-twenty"].includes(event.target.name)) updateDistanceFields();
+    if (event.target.name === "scenario" || event.target.name === "finish-distance") updateDistanceFields();
   });
   form.addEventListener("input", () => maximum.setCustomValidity(""));
 
@@ -165,9 +176,10 @@ export function setupPractice() {
     }
     distanceRange = { min, max };
     randomDistance = random;
-    scenario = selection.get("scenario");
+    const mode = selection.get("scenario");
+    testSelected = mode === "test";
+    scenario = testSelected ? "finish" : mode;
     okDistance = scenario === "finish" ? Number(selection.get("ok-distance")) : DEFAULT_OK_DISTANCE;
-    testSelected = scenario === "finish" && testOption.checked;
     resetTest();
     pendingRound = undefined;
     round = undefined;
@@ -282,6 +294,7 @@ export function setupPractice() {
       }
       round.strokes = stroke.stroke;
       pendingRound = { score: stroke.score, remaining: result.remaining };
+      if (test) showTestProgress();
     }
     const number = persist ? ++shots : ++demoShots;
     field("shot-count").textContent = `${number} 球`;
