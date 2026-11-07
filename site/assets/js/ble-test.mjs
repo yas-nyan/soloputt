@@ -1,4 +1,5 @@
 import { chooseDevice, ZeroPuttConnection } from "./bluetooth.mjs";
+import { setupDeviceSettings } from "./device-settings.mjs";
 
 const connect = document.querySelector("#connect");
 const scanAll = document.querySelector("#scan-all");
@@ -10,6 +11,7 @@ const angle = document.querySelector("#angle");
 const speed = document.querySelector("#speed");
 const count = document.querySelector("#count");
 const angleNote = document.querySelector("#angle-note");
+const setSettingsConnection = setupDeviceSettings();
 let connection;
 let shots = 0;
 
@@ -56,6 +58,7 @@ async function connectDevice(showAll) {
     current = new ZeroPuttConnection(device, {
       status(message) {
         if (message === "初期化中") disconnect.disabled = false;
+        if (message === "計測準備完了") setSettingsConnection(current);
         setStatus(message, message === "計測準備完了" ? "ready" : "working");
       },
       log,
@@ -63,6 +66,7 @@ async function connectDevice(showAll) {
       closed(message) {
         if (connection !== current) return;
         connection = undefined;
+        setSettingsConnection(undefined);
         disconnect.disabled = true;
         setDiscoveryDisabled(false);
         setStatus(message);

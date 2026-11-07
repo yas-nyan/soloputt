@@ -48,10 +48,28 @@ button {
   cursor: pointer;
 }
 
-#disconnect, #scan-all { background: #fff; color: #154e36; }
+#disconnect, #scan-all, #open-device-settings, button.secondary { background: #fff; color: #154e36; }
 button:disabled { opacity: .55; cursor: default; }
 button:focus-visible, summary:focus-visible { outline: 3px solid #17653f; outline-offset: 3px; }
 .note { color: #405d50; font-size: .85rem; }
+#device-settings .actions { align-items: center; }
+#device-settings select {
+  min-height: 44px;
+  padding: .45rem .65rem;
+  border: 1px solid #c9d9cf;
+  border-radius: .5rem;
+  font: inherit;
+}
+#device-settings details { margin-top: .9rem; }
+.device-values {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: baseline;
+  gap: .4rem .7rem;
+  margin-top: .7rem;
+}
+.device-values dd { font-size: .95rem; overflow-wrap: anywhere; }
+.device-values small { display: block; color: #405d50; }
 #compatibility, #angle-note { margin-top: .75rem; }
 
 .measurements { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .65rem; margin-top: .75rem; }

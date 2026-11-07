@@ -2,11 +2,13 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { setImmediate } from "node:timers/promises";
 import { chooseDevice, ZeroPuttConnection } from "../site/assets/js/bluetooth.mjs";
-import { lineReader, NOTIFY, parseShot, SERVICE, WRITE } from "../site/assets/js/protocol.mjs";
+import { lineReader, NOTIFY, parseSettings, parseShot, screenGreenSpeedWrite, SERVICE, WRITE } from "../site/assets/js/protocol.mjs";
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 const fixture = "0,3.20,2.10,-1.25,0.00,2.30";
+const settingsFixture = "3,17,1,244,4,Fixture,0,0,21,455,1,999";
+const speedWrite = "31502,17,1,305,4,Fixture,0,0,21,455,1";
 const expectedShot = {
   distance: 3.2, rollSpeed: 2.1, angle: -1.25, remaining: 0, speed: 2.3,
 };
@@ -43,6 +45,21 @@ test("unfiltered device picker still grants access to the custom service", async
   }, true);
 });
 
+test("settings map speed and preserve the fields outside the requested change", () => {
+  const settings = parseSettings(settingsFixture);
+  assert.equal(settings.greenSpeedLabel, "普通 (8.0 ft)");
+  assert.equal(settings.unit, "1");
+  assert.equal(settings.command, "0");
+  assert.equal(settings.animation, "1");
+  assert.equal(screenGreenSpeedWrite(settings, "305"), speedWrite);
+  assert.equal(settings.fields.join(","), settingsFixture);
+  assert.equal(parseSettings("3,fixture"), null);
+  const green = parseSettings("3,17,0,397,4,Fixture,0,1,21,455,1,999");
+  assert.equal(green.greenSpeedLabel, "13.0 ft");
+  assert.throws(() => screenGreenSpeedWrite(green, "305"), /スクリーンモード/);
+  assert.throws(() => screenGreenSpeedWrite(settings, "397"), /スクリーンモード/);
+});
+
 for (const method of ["writeValueWithResponse", "writeValue"]) {
   test(`initializes and acknowledges measurements and heartbeat via ${method}`, async (t) => {
     t.mock.timers.enable({ apis: ["setTimeout"] });
@@ -51,6 +68,8 @@ for (const method of ["writeValueWithResponse", "writeValue"]) {
     const shots = [];
     const notify = new EventTarget();
     let subscribed = false;
+    let deviceSettings = settingsFixture;
+    let acceptSettingsWrite = true;
     notify.startNotifications = async () => { subscribed = true; };
 
     function emit(text) {
@@ -64,7 +83,10 @@ for (const method of ["writeValueWithResponse", "writeValue"]) {
         const command = decoder.decode(value);
         sent.push(command);
         if (command === "6\n") emit("6,1,2\n");
-        if (command === "2\n") emit("3,fixture\n");
+        if (command === "2\n") emit(`${deviceSettings}\n`);
+        if (command === `${speedWrite}\n` && acceptSettingsWrite) {
+          deviceSettings = settingsFixture.replace(",244,", ",305,");
+        }
       },
     };
     const device = new EventTarget();
@@ -106,6 +128,26 @@ for (const method of ["writeValueWithResponse", "writeValue"]) {
     await setImmediate();
     assert.deepEqual(sent, ["6\n", "2\n", "9\n", "B\n"]);
     assert.deepEqual(shots, [expectedShot]);
+
+    assert.equal((await session.readSettings()).greenSpeed, "244");
+    const saving = session.saveScreenGreenSpeed("305");
+    await assert.rejects(session.readSettings(), /処理中/);
+    await setImmediate();
+    assert.deepEqual(sent.slice(4), ["2\n", "2\n", `${speedWrite}\n`]);
+    t.mock.timers.tick(999);
+    await setImmediate();
+    assert.equal(sent.includes("c,1\n"), false);
+    t.mock.timers.tick(1);
+    assert.equal((await saving).greenSpeed, "305");
+    assert.deepEqual(sent.slice(-2), ["c,1\n", "2\n"]);
+
+    deviceSettings = settingsFixture;
+    acceptSettingsWrite = false;
+    const mismatch = assert.rejects(session.saveScreenGreenSpeed("305"), /一致しません/);
+    await setImmediate();
+    t.mock.timers.tick(1000);
+    await mismatch;
+    assert.equal((await session.readSettings()).greenSpeed, "244");
 
     session.close();
     emit(`${fixture}\n`);

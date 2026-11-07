@@ -24,9 +24,43 @@
       <div class="actions">
         <button id="connect" type="button">ZeroPuttに接続</button>
         <button id="disconnect" type="button" disabled>切断</button>
+        <button id="open-device-settings" type="button" aria-controls="device-settings" aria-expanded="false" disabled>機器設定</button>
         <button id="scan-all" type="button">絞り込みなしで探す(debug用)</button>
       </div>
       <p id="compatibility" class="note" hidden>HTTPSのページをiPadのBluefyまたはMacのChromeで開いてください。Macでのローカル開発にはlocalhostも使えます。</p>
+    </section>
+
+    <section id="device-settings" class="panel" aria-labelledby="device-settings-heading" hidden>
+      <div class="row">
+        <h2 id="device-settings-heading">機器設定</h2>
+        <button id="read-device-settings" class="secondary" type="button">本体から読み直す</button>
+      </div>
+      <dl class="device-values">
+        <dt>現在のモード</dt><dd id="device-green-mode">–</dd>
+        <dt>本体のグリーン速度</dt><dd id="device-green-speed">–</dd>
+      </dl>
+      <div class="actions">
+        <label for="screen-green-speed">スクリーンモードのグリーン速度</label>
+        <select id="screen-green-speed" disabled>
+          <option value="" disabled>速度を選択</option>
+        </select>
+        <button id="save-green-speed" type="button" disabled>本体に保存</button>
+      </div>
+      <p id="device-settings-status" class="note" role="status"></p>
+      <details>
+        <summary>その他の本体設定（閲覧のみ）</summary>
+        <p class="note">以下は主にスタンドアロンモードや公式アプリで使う設定です。SoloPuttでは利用せず、現在値のみ表示します。</p>
+        <dl class="device-values">
+          <dt>Meter / Feet <small>公式アプリのグリーンモードでのグリーンスピード表示</small></dt>
+          <dd id="device-unit">–</dd>
+          <dt>アニメ効果 <small>スタンドアロン時の本体のボールアニメーション</small></dt>
+          <dd id="device-animation">–</dd>
+          <dt>パター距離設定 <small>スタンドアロン時の距離設定 (筆者の環境では動かなかった) </small></dt>
+          <dd id="device-putt-distance">–</dd>
+          <dt>コマンド設定 <small>本体センサーで目標距離やグリーンスピードを変更可能にするかどうか</small></dt>
+          <dd id="device-command">–</dd>
+        </dl>
+      </details>
     </section>
 
     <section class="panel" aria-labelledby="measurement-heading">

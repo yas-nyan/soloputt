@@ -1,4 +1,4 @@
-import { lineReader, NOTIFY, parseShot, SERVICE, WRITE } from "./protocol.mjs";
+import { lineReader, NOTIFY, parseSettings, parseShot, screenGreenSpeedWrite, SERVICE, WRITE } from "./protocol.mjs";
 
 const encoder = new TextEncoder();
 
@@ -15,6 +15,8 @@ export class ZeroPuttConnection {
   #notify;
   #write;
   #closed = false;
+  #ready = false;
+  #saving = false;
   #receive = lineReader();
   #pending = null;
   #writes = Promise.resolve();
@@ -49,7 +51,33 @@ export class ZeroPuttConnection {
     this.#assertOpen();
     await this.#exchange("2", "3,");
     this.#assertOpen();
+    this.#ready = true;
     status("計測準備完了");
+  }
+
+  async readSettings() {
+    this.#assertSettingsAvailable();
+    return this.#readSettings();
+  }
+
+  async saveScreenGreenSpeed(speed) {
+    this.#assertSettingsAvailable();
+    this.#saving = true;
+    try {
+      const current = await this.#readSettings();
+      const command = screenGreenSpeedWrite(current, speed);
+      if (speed === current.greenSpeed) return current;
+      await this.#send(command, "設定データ");
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await this.#send("c,1");
+      const verified = await this.#readSettings();
+      if (verified.greenMode !== current.greenMode || verified.greenSpeed !== speed) {
+        throw new Error("読み戻した値が設定したグリーン速度と一致しません");
+      }
+      return verified;
+    } finally {
+      this.#saving = false;
+    }
   }
 
   close(message = "未接続") {
@@ -66,6 +94,19 @@ export class ZeroPuttConnection {
     if (this.#closed) throw new Error("接続が終了しました");
   }
 
+  #assertSettingsAvailable() {
+    this.#assertOpen();
+    if (!this.#ready) throw new Error("機器の初期化が完了していません");
+    if (this.#saving || this.#pending) throw new Error("機器設定を処理中です");
+  }
+
+  async #readSettings() {
+    const response = await this.#exchange("2", "3,");
+    const settings = parseSettings(response);
+    if (!settings) throw new Error("本体の設定応答の形式を確認できませんでした");
+    return settings;
+  }
+
   #onDisconnect = () => this.close("接続が切れました");
 
   #onValue = (event) => {
@@ -75,7 +116,7 @@ export class ZeroPuttConnection {
       const type = line.split(",", 1)[0];
       log(`RX ${["0", "3", "6", "B"].includes(type) ? type : "不明な通知"}`);
       if (this.#pending && line.startsWith(this.#pending.prefix)) {
-        this.#pending.resolve();
+        this.#pending.resolve(line);
       }
       if (line === "B") {
         this.#sendReply("B");
@@ -91,7 +132,7 @@ export class ZeroPuttConnection {
     }
   };
 
-  #send(command) {
+  #send(command, logLabel = command) {
     const write = this.#writes.then(async () => {
       this.#assertOpen();
       const value = encoder.encode(`${command}\n`);
@@ -100,7 +141,7 @@ export class ZeroPuttConnection {
       } else {
         await this.#write.writeValue(value);
       }
-      if (!this.#closed) this.#callbacks.log(`TX ${command}`);
+      if (!this.#closed) this.#callbacks.log(`TX ${logLabel}`);
     });
     this.#writes = write.catch(() => {});
     return write;
@@ -119,7 +160,8 @@ export class ZeroPuttConnection {
       timer = setTimeout(() => reject(new Error(`${command} の応答を受信できませんでした`)), 8000);
     });
     try {
-      await Promise.all([response, this.#send(command)]);
+      const [line] = await Promise.all([response, this.#send(command)]);
+      return line;
     } finally {
       clearTimeout(timer);
       this.#pending = null;
