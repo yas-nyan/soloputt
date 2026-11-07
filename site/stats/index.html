@@ -176,7 +176,7 @@
             <tbody id="daily-stats"></tbody>
           </table>
         </div>
-        <p class="note">ブラウザの現地日付で集計します。方向は有効な角度、ショート・オーバーは入らなかった球の有効な推定距離、カップイン率は判定対象の球が分母です。</p>
+        <p class="note">ブラウザの現地日付で集計し、打ち出し角は±0.50°以内を中央とします。方向は有効な角度、ショート・オーバーは入らなかった球の有効な推定距離、カップイン率は判定対象の球が分母です。</p>
       </section>
       <section class="panel stats-section" aria-labelledby="distance-heading">
         <div class="panel-heading"><p class="eyebrow">BY DISTANCE</p><h2 id="distance-heading">目標距離別</h2></div>
@@ -192,7 +192,7 @@
         <div class="panel-heading"><p class="eyebrow">START LINE</p><h2 id="direction-heading">打ち出し方向の分布</h2></div>
         <dl class="direction-sides">
           <div data-tone="left"><dt>左</dt><dd id="direction-left">—</dd></div>
-          <div data-tone="neutral"><dt>中央（±0.25°以内）</dt><dd id="direction-centre">—</dd></div>
+          <div data-tone="neutral"><dt>中央（±0.50°以内）</dt><dd id="direction-centre">—</dd></div>
           <div data-tone="right"><dt>右</dt><dd id="direction-right">—</dd></div>
         </dl>
         <div id="direction-chart" class="table-wrap" tabindex="0" role="region" aria-labelledby="direction-heading">

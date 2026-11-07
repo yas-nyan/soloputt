@@ -43,7 +43,7 @@ function upgrade(request, oldVersion) {
 
 function openDatabase() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("soloputt", 7);
+    const request = indexedDB.open("soloputt", 8);
     request.onupgradeneeded = (event) => upgrade(request, event.oldVersion);
     request.onerror = () => reject(request.error);
     request.onsuccess = () => {

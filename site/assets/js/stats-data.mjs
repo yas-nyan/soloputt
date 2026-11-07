@@ -1,6 +1,5 @@
-export const CENTRE_ANGLE = 0.25;
+export const CENTRE_ANGLE = 0.5;
 export const ANGLE_BANDS = [
-  { maximum: 0.5, label: "0.25–0.5°" },
   { maximum: 1, label: "0.5–1°" },
   { maximum: 2, label: "1–2°" },
   { maximum: Infinity, label: "2°超" },
