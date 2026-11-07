@@ -118,7 +118,7 @@ for (const method of ["writeValueWithResponse", "writeValue"]) {
     const opening = session.open();
     await setImmediate();
     assert.deepEqual(sent, ["6\n"]);
-    t.mock.timers.tick(6999);
+    t.mock.timers.tick(999);
     await setImmediate();
     assert.deepEqual(sent, ["6\n"]);
     t.mock.timers.tick(1);
@@ -140,17 +140,17 @@ for (const method of ["writeValueWithResponse", "writeValue"]) {
     const saving = session.saveScreenGreenSpeed("305");
     await assert.rejects(session.readSettings(), /処理中/);
     await setImmediate();
-    await advance(1999);
+    await advance(999);
     assert.deepEqual(sent.slice(4), ["2\n", "2\n"]);
     await advance(1);
     assert.deepEqual(sent.slice(4), ["2\n", "2\n", `${speedWrite}\n`]);
-    await advance(700);
+    await advance(350);
     assert.equal(sent.at(-1), "2\n");
-    await advance(299);
+    await advance(149);
     assert.equal(sent.includes("c,1\n"), false);
     await advance(1);
     assert.equal(sent.at(-1), "c,1\n");
-    await advance(1000);
+    await advance(500);
     assert.equal((await saving).greenSpeed, "305");
     assert.deepEqual(sent.slice(-2), ["c,1\n", "2\n"]);
 
@@ -159,8 +159,8 @@ for (const method of ["writeValueWithResponse", "writeValue"]) {
     const failedStart = sent.length;
     const mismatch = assert.rejects(session.saveScreenGreenSpeed("305"), /保存指示は未送信/);
     await setImmediate();
-    await advance(2000);
-    await advance(700);
+    await advance(1000);
+    await advance(350);
     await mismatch;
     assert.deepEqual(sent.slice(failedStart), ["2\n", `${speedWrite}\n`, "2\n"]);
 
@@ -168,10 +168,10 @@ for (const method of ["writeValueWithResponse", "writeValue"]) {
     revertOnCommit = true;
     const commitMismatch = assert.rejects(session.saveScreenGreenSpeed("305"), /保存指示の後.*一致しません/);
     await setImmediate();
-    await advance(2000);
-    await advance(700);
-    await advance(300);
     await advance(1000);
+    await advance(350);
+    await advance(150);
+    await advance(500);
     await commitMismatch;
     assert.equal((await session.readSettings()).greenSpeed, "244");
 
