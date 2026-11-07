@@ -1,6 +1,7 @@
 import { chooseDevice, ZeroPuttConnection } from "./bluetooth.mjs";
 import { setupDeviceSettings } from "./device-settings.mjs";
 import { setupPractice } from "./practice.mjs";
+import { setupScreenWakeLock } from "./screen-wake-lock.mjs";
 
 const connect = document.querySelector("#connect");
 const scanAll = document.querySelector("#scan-all");
@@ -8,12 +9,21 @@ const disconnect = document.querySelector("#disconnect");
 const demoToggle = document.querySelector("#practice-demo-toggle");
 const status = document.querySelector("#status");
 const logList = document.querySelector("#log");
+const wakeNote = document.querySelector("#screen-wake-note");
 const setSettingsConnection = setupDeviceSettings();
 const practice = setupPractice();
+const screenWakeLock = setupScreenWakeLock({
+  wakeLock: navigator.wakeLock,
+  document,
+  onStatus(state) {
+    wakeNote.hidden = state !== "unavailable";
+  },
+});
 const supportsBluetooth = window.isSecureContext && typeof navigator.bluetooth?.requestDevice === "function";
 const unsupportedMessage = "このページではBLE接続を利用できません";
 let connection;
 let demo = false;
+let deviceReady = false;
 
 function setStatus(message, state = "idle") {
   status.textContent = message;
@@ -45,8 +55,10 @@ async function connectDevice(showAll) {
       status(message) {
         if (message === "初期化中") disconnect.disabled = false;
         if (message === "計測準備完了") {
+          deviceReady = true;
           setSettingsConnection(current);
           practice.setReady(true);
+          screenWakeLock.setActive(true);
         }
         setStatus(message, message === "計測準備完了" ? "ready" : "working");
       },
@@ -56,9 +68,11 @@ async function connectDevice(showAll) {
       closed(message) {
         if (connection !== current) return;
         connection = undefined;
+        deviceReady = false;
         setSettingsConnection(undefined);
         practice.setReady(false);
         practice.setGreen(null);
+        screenWakeLock.setActive(demo);
         disconnect.disabled = true;
         setDiscoveryDisabled(false);
         setStatus(message);
@@ -91,6 +105,7 @@ demoToggle.addEventListener("click", () => {
   if (demoToggle.disabled) return;
   demo = !demo;
   practice.setDemo(demo);
+  screenWakeLock.setActive(demo || deviceReady);
   demoToggle.setAttribute("aria-expanded", String(demo));
   demoToggle.textContent = demo ? "デモを終了" : "デモを試す";
   setDiscoveryDisabled(false);

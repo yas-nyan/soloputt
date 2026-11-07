@@ -35,6 +35,7 @@ h2 { font-size: 1.14rem; letter-spacing: -.025em; }
 .note { color: var(--text-muted); font-size: .83rem; }
 .banner { padding: .75rem 1rem; background: #e9efe4; border-radius: .55rem; margin-block: 0 1rem; }
 .connection, .connection-actions, .row, .actions, .utility-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem; }
+.wake-note { max-width: 24rem; margin: .35rem 0 0; }
 .row, .utility-bar { justify-content: space-between; gap: .5rem 1rem; }
 .status { font-size: .82rem; font-weight: 700; }
 .status[data-state="ready"] { color: #195d3d; }
