@@ -255,8 +255,8 @@ export function setupPractice() {
           target = nextDistance(target);
           showTarget();
         }, 1200);
-      } else if (demo) {
-        setDemoBusy(false);
+      } else {
+        next = setTimeout(showTarget, 1200);
       }
     }
 
