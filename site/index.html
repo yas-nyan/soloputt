@@ -83,11 +83,20 @@
             <label><input type="radio" name="scenario" value="random"><span>ランダム</span></label>
             <label><input type="radio" name="scenario" value="finish"><span>ホールアウト</span></label>
           </fieldset>
-          <div class="distance-control">
+          <fieldset id="finish-distance-options" class="finish-distance-options" hidden>
+            <legend>開始距離の選び方</legend>
+            <label><input type="radio" name="finish-distance" value="fixed" checked> 固定</label>
+            <label><input type="radio" name="finish-distance" value="random"> ランダム</label>
+          </fieldset>
+          <div id="single-distance" class="distance-control">
             <label for="target-range" id="target-label">目標距離</label>
             <div><input id="target-range" type="number" min="0.5" max="20" step="0.1" value="3.0" inputmode="decimal" required><span>m</span></div>
           </div>
-          <p class="note">ランダムは0.5 mから指定距離まで。ホールアウトは残り距離から続け、カップインか1 m未満のOKで終了します。</p>
+          <div id="random-range" class="distance-control random-range" hidden>
+            <label>下限 <input id="distance-min" type="number" min="0.5" max="20" step="0.1" value="0.5" inputmode="decimal" required disabled> m</label>
+            <label>上限 <input id="distance-max" type="number" min="0.5" max="20" step="0.1" value="3.0" inputmode="decimal" required disabled> m</label>
+          </div>
+          <p class="note">ランダムは指定範囲から0.1 m刻みで選びます。ホールアウトはカップインか1 m未満のOKまで、残り距離から続けます。</p>
           <button type="submit" class="apply-target">目標を適用</button>
         </form>
       </section>

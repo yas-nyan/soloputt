@@ -33,9 +33,11 @@ test("keeps error markers and unavailable settings out of the cup-in rate", () =
 });
 
 test("random practice covers the inclusive range without repeating when possible", () => {
-  assert.equal(randomTarget(3, 2, () => 0), 0.5);
-  assert.equal(randomTarget(3, 2, () => 0.999), 3);
-  assert.equal(randomTarget(0.6, 0.5, () => 0), 0.6);
-  assert.equal(randomTarget(0.6, 0.6, () => 0.999), 0.5);
-  assert.equal(randomTarget(0.5, 0.5, () => 0.999), 0.5);
+  assert.equal(randomTarget(0.5, 3, 2, () => 0), 0.5);
+  assert.equal(randomTarget(4, 6, 3, () => 0), 4);
+  assert.equal(randomTarget(4, 6, 3, () => 0.999), 6);
+  assert.equal(randomTarget(0.5, 3, 2, () => 0.999), 3);
+  assert.equal(randomTarget(0.5, 0.6, 0.5, () => 0), 0.6);
+  assert.equal(randomTarget(0.5, 0.6, 0.6, () => 0.999), 0.5);
+  assert.equal(randomTarget(0.5, 0.5, 0.5, () => 0.999), 0.5);
 });

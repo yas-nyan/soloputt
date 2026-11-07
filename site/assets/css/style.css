@@ -222,3 +222,10 @@ tbody tr:hover { background: #eaf0e4; }
 .finish-totals dd { font-size: 1rem; }
 
 #demo-status { font-size: .88rem; font-weight: 750; }
+
+.finish-distance-options { border: 0; margin: 0 0 .6rem; padding: 0; font-size: .88rem; }
+.finish-distance-options legend { margin-bottom: .2rem; font-weight: 650; }
+.finish-distance-options label { display: inline-flex; align-items: center; min-height: 36px; margin-right: .65rem; }
+.finish-distance-options input { accent-color: var(--green); margin-right: .25rem; }
+.random-range { justify-content: flex-start; }
+.random-range input { margin-inline: .2rem 0; }

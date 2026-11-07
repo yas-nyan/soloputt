@@ -18,14 +18,17 @@ const REASONS = {
 export function setupPractice() {
   const field = (id) => document.getElementById(id);
   const form = field("practice-form");
-  const range = field("target-range");
+  const distance = field("target-range");
+  const minimum = field("distance-min");
+  const maximum = field("distance-max");
   const ball = field("ball");
   const trail = field("trail");
   const course = field("practice-course");
   const feedback = field("course-feedback");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let scenario = "fixed";
-  let limit = 3;
+  let distanceRange = { min: 3, max: 3 };
+  let randomDistance = false;
   let target = 3;
   let greenSpeed = null;
   let ready = false;
@@ -54,10 +57,11 @@ export function setupPractice() {
     hideFeedback();
     field("target").textContent = target.toFixed(round?.strokes ? 2 : 1);
     field("remaining").textContent = target.toFixed(2);
-    field("scenario-label").textContent = scenario === "random" ? `${limit.toFixed(1)} m以内ランダム`
-      : round ? "ホールアウト" : "固定距離";
+    const range = `${distanceRange.min.toFixed(1)}〜${distanceRange.max.toFixed(1)} m`;
+    field("scenario-label").textContent = round ? randomDistance ? `ホールアウト · ${range}` : "ホールアウト"
+      : randomDistance ? `${range} ランダム` : "固定距離";
     field("round-progress").hidden = !round;
-    if (round) field("round-progress").textContent = `開始 ${limit.toFixed(1)} m · 次は ${round.strokes + 1} 打目`;
+    if (round) field("round-progress").textContent = `開始 ${round.start.toFixed(1)} m · 次は ${round.strokes + 1} 打目`;
     field("round-status").textContent = ready ? "準備完了" : "接続待ち";
     ball.setAttribute("cx", BALL_X);
     ball.setAttribute("cy", BALL_Y);
@@ -71,9 +75,14 @@ export function setupPractice() {
     clearTimeout(next);
   }
 
+  function nextDistance(previous) {
+    const { min, max } = distanceRange;
+    return randomDistance ? randomTarget(min, max, previous) : min;
+  }
+
   function startRound() {
-    target = limit;
-    round = { id: crypto.randomUUID(), strokes: 0 };
+    target = nextDistance(round?.start);
+    round = { id: crypto.randomUUID(), start: target, strokes: 0 };
   }
 
   function advanceRound() {
@@ -83,21 +92,48 @@ export function setupPractice() {
     pendingRound = undefined;
   }
 
+  function usesRandomDistance(selection) {
+    const mode = selection.get("scenario");
+    return mode === "random" || (mode === "finish" && selection.get("finish-distance") === "random");
+  }
+
+  function updateDistanceFields() {
+    const selection = new FormData(form);
+    const finish = selection.get("scenario") === "finish";
+    const random = usesRandomDistance(selection);
+    field("finish-distance-options").hidden = !finish;
+    field("single-distance").hidden = random;
+    field("random-range").hidden = !random;
+    field("target-label").textContent = finish ? "開始距離" : "目標距離";
+    distance.disabled = random;
+    minimum.disabled = !random;
+    maximum.disabled = !random;
+    maximum.setCustomValidity("");
+  }
+
   form.addEventListener("change", (event) => {
-    if (event.target.name !== "scenario") return;
-    const labels = { fixed: "目標距離", random: "ランダムの上限", finish: "ホールアウトの開始距離" };
-    field("target-label").textContent = labels[event.target.value];
+    if (event.target.name === "scenario" || event.target.name === "finish-distance") updateDistanceFields();
   });
+  form.addEventListener("input", () => maximum.setCustomValidity(""));
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     const selection = new FormData(form);
-    limit = range.valueAsNumber;
+    const random = usesRandomDistance(selection);
+    const min = random ? minimum.valueAsNumber : distance.valueAsNumber;
+    const max = random ? maximum.valueAsNumber : min;
+    if (min > max) {
+      maximum.setCustomValidity("上限は下限以上にしてください。");
+      maximum.reportValidity();
+      return;
+    }
+    distanceRange = { min, max };
+    randomDistance = random;
     scenario = selection.get("scenario");
     pendingRound = undefined;
     round = undefined;
     if (scenario === "finish") startRound();
-    else target = scenario === "random" ? randomTarget(limit, target) : limit;
+    else target = nextDistance(target);
     field("round-notice").textContent = "";
     stopAnimation();
     showTarget();
@@ -157,7 +193,7 @@ export function setupPractice() {
         }, roundResult.score === null ? 900 : 1800);
       } else if (scenario === "random") {
         next = setTimeout(() => {
-          target = randomTarget(limit, target);
+          target = nextDistance(target);
           showTarget();
         }, 1200);
       }
@@ -219,12 +255,13 @@ export function setupPractice() {
     saveShot({
       time: Date.now(), target, scenario, greenSpeed, ...shot,
       outcome: result.outcome, leave: result.remaining ?? null, model: 1,
-      ...(stroke ? { roundId: round.id, roundStart: limit, roundStroke: stroke.stroke, roundScore: stroke.score } : {}),
+      ...(stroke ? { roundId: round.id, roundStart: round.start, roundStroke: stroke.stroke, roundScore: stroke.score } : {}),
     }).catch(() => {
       field("save-status").textContent = `${++saveFailures} 球を履歴に保存できませんでした`;
     });
   }
 
+  updateDistanceFields();
   showTarget();
   return { setReady, setGreen, showShot };
 }

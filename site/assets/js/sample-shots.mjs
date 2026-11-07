@@ -21,7 +21,7 @@ export function* generateSampleShots(count, seed, {
   for (let i = 0; i < count; i++) {
     const time = start + i * interval;
     const scenario = i % 3 ? "fixed" : "random";
-    const target = scenario === "fixed" ? fixedTargets[Math.floor(i / 12) % fixedTargets.length] : randomTarget(8, 0, random);
+    const target = scenario === "fixed" ? fixedTargets[Math.floor(i / 12) % fixedTargets.length] : randomTarget(0.5, 8, 0, random);
     const greenSpeed = speeds[Math.floor(i / 40) % speeds.length];
     const shift = varyByDay ? (new Date(time).getDate() % 2 ? 0.45 : -0.45) : 0;
     const direction = (scenario === "fixed" ? -0.35 : 0.55) + shift;

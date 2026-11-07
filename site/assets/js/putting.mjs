@@ -9,8 +9,8 @@ export function classifyLeave(distance) {
   return Number.isFinite(distance) && distance >= 0 && distance < OK_DISTANCE ? "concede" : "miss";
 }
 
-export function randomTarget(maximum, previous, random = Math.random) {
-  const first = Math.round(MIN_TARGET * 10);
+export function randomTarget(minimum, maximum, previous, random = Math.random) {
+  const first = Math.round(minimum * 10);
   const last = Math.round(maximum * 10);
   const prior = Math.round(previous * 10);
   const omit = prior >= first && prior <= last && first < last;
