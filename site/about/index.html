@@ -51,7 +51,7 @@
       <section class="panel article" aria-labelledby="model-heading">
         <h2 id="model-heading">カップインの判定</h2>
         <p>平坦なグリーンを想定し、本体の推定距離・角度・グリーン速度から、ボールがカップの縁に到達する速度と横ずれを求めます。Pennerの論文に掲載された捕球限界の近似式を使った、SoloPutt独自の判定です。</p>
-        <p>ホールアウトではOKの距離を選べます。OKで終えた場合は実際に打った数に1打を足して記録します。</p>
+        <p>ボールを打ち出す位置からZeroPuttのセンサーまでの距離は0.7 mです。これを基準に、カップインしなかった球はカップから0.7 m以内をOK圏内と判定します。OK距離は全ての練習で0.7 mに統一し、ホールアウトをOKで終えた場合は実際に打った数に1打を足して記録します。</p>
         <p><a href="https://doi.org/10.1139/p01-137">A. R. Penner, The physics of putting（2002年）</a></p>
       </section>
       <section class="panel article" aria-labelledby="analysis-heading">

@@ -81,10 +81,8 @@ function renderRounds(result) {
     rate(total.one, total.completed), rate(total.two, total.completed), rate(total.three, total.completed),
     total.knownFirst ? `${mean(total.firstLeave, total.knownFirst, " m")}（${total.knownFirst}回）` : "—",
   ]));
-  const gimme = [...result.okDistances].sort((a, b) => (a ?? 2) - (b ?? 2)).map((value) =>
-    value === null ? "不明" : value === 0 ? "なし" : value === 1 ? "旧1 m" : `${value * 100} cm`).join("・");
   field("analysis-gimme").textContent = result.rounds.size
-    ? `記録時の打数を集計します。OKは実打に1打加算。対象のOK距離は ${gimme} です。`
+    ? "記録済みの打数を集計します。現在の判定はカップから0.7 m以内をOK圏内とし、OKで終了した回は実打数に1打を加算します。"
     : "完了したホールアウトの記録がありません。";
   field("analysis-tests-wrap").hidden = !result.tests.size;
   rows("analysis-tests", [...result.tests].reverse().map(([id, scores]) => {
@@ -109,7 +107,7 @@ function render(result, selected, rejudge) {
   const versions = [...result.versions].map(([version, n]) => `${version}（${n}球）`).join("・") || "—";
   field("analysis-model").textContent = rejudge
     ? `記録時は ${rate(recorded.holed, recorded.judged)}、再計算で ${result.changed} 球の判定が変わりました。OK ${recorded.concede}→${displayed.concede} 球、ミス ${recorded.miss}→${displayed.miss} 球。記録時のモデル ${versions}。`
-    : `記録時のモデル ${versions}。再計算は記録したOK距離を使い、設定の記録がない球は50 cmとします。`;
+    : `記録時のモデル ${versions}。再計算ではOK距離を0.7 mに統一します。`;
   renderBlocks(result.blocks);
   renderRounds(result);
   drawScatter(result.points, result.pointCount);

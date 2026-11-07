@@ -1,6 +1,6 @@
 import { setupPracticeSession } from "./practice-session.mjs";
 import { recordStroke } from "./finish-round.mjs";
-import { DEFAULT_OK_DISTANCE, evaluatePutt, formatAngle, formatShotSummary, OUTCOME_LABELS, randomTarget, SHOT_MODEL_VERSION } from "./putting.mjs";
+import { evaluatePutt, formatAngle, formatShotSummary, OUTCOME_LABELS, randomTarget, SHOT_MODEL_VERSION } from "./putting.mjs";
 import { DEMO_GREEN_SPEED, demoShot } from "./practice-demo.mjs";
 import { saveShot } from "./shot-store.mjs";
 
@@ -45,7 +45,6 @@ export function setupPractice() {
   let pendingRound;
   let demo = false;
   let demoShots = 0;
-  let okDistance = DEFAULT_OK_DISTANCE;
   let testSelected = false;
   let test;
   let draftMode = "practice";
@@ -67,7 +66,7 @@ export function setupPractice() {
 
   function setDemoBusy(busy) {
     for (const button of demoButtons) {
-      button.disabled = busy || test?.scores.length === 20 || (button.dataset.demoOutcome === "concede" && okDistance === 0);
+      button.disabled = busy || test?.scores.length === 20;
     }
   }
 
@@ -180,7 +179,6 @@ export function setupPractice() {
     const mode = selection.get("scenario");
     testSelected = mode === "test";
     scenario = testSelected ? "finish" : mode;
-    okDistance = scenario === "finish" ? Number(selection.get("ok-distance")) : DEFAULT_OK_DISTANCE;
     resetTest();
     pendingRound = undefined;
     round = undefined;
@@ -286,7 +284,7 @@ export function setupPractice() {
       return;
     }
     stopAnimation();
-    const result = evaluatePutt(shot, target, greenSpeed, okDistance);
+    const result = evaluatePutt(shot, target, greenSpeed);
     const summary = field("green-shot-summary");
     summary.textContent = formatShotSummary(shot, target, result.remaining);
     summary.hidden = false;
@@ -331,7 +329,6 @@ export function setupPractice() {
     saveShot({
       time: Date.now(), target, scenario, greenSpeed, ...shot, ...(stroke ? round.session : test?.metadata ?? session.current),
       outcome: result.outcome, leave: result.remaining ?? null, model: SHOT_MODEL_VERSION,
-      ...(scenario === "finish" ? { okRadius: okDistance } : {}),
       ...(stroke ? {
         roundId: (round.id ??= crypto.randomUUID()), roundStart: round.start, roundStroke: stroke.stroke,
         roundScore: stroke.score, roundFirstLeave: round.firstLeave, ...(test ? { testHole: test.scores.length + 1 } : {}),
@@ -373,7 +370,7 @@ export function setupPractice() {
     button.addEventListener("click", () => {
       if (!demo || button.disabled) return;
       setDemoBusy(true);
-      receiveShot(demoShot(button.dataset.demoOutcome, target, Math.random, okDistance), false);
+      receiveShot(demoShot(button.dataset.demoOutcome, target), false);
     });
   }
 

@@ -54,7 +54,7 @@ function countRound(totals, shot, leave) {
 
 export function createAnalysis({ sessionId = "", rejudge = false } = {}) {
   const result = {
-    sessions: new Map(), rounds: new Map(), tests: new Map(), okDistances: new Set(),
+    sessions: new Map(), rounds: new Map(), tests: new Map(),
     totals: measurements(), blocks: [], points: [], pointCount: 0,
     recorded: { judged: 0, holed: 0, concede: 0, miss: 0, unjudged: 0 },
     displayed: { judged: 0, holed: 0, concede: 0, miss: 0, unjudged: 0 }, changed: 0,
@@ -84,7 +84,7 @@ export function createAnalysis({ sessionId = "", rejudge = false } = {}) {
       measure(result.blocks[blockIndex], shot);
     }
 
-    const outcome = rejudge ? evaluatePutt(shot, shot.target, shot.greenSpeed, shot.okRadius).outcome : shot.outcome;
+    const outcome = rejudge ? evaluatePutt(shot, shot.target, shot.greenSpeed).outcome : shot.outcome;
     result.recorded[shot.outcome]++;
     result.displayed[outcome]++;
     if (shot.outcome !== "unjudged") result.recorded.judged++;
@@ -108,7 +108,6 @@ export function createAnalysis({ sessionId = "", rejudge = false } = {}) {
     firstLeaves.delete(shot.roundId);
     if (!result.rounds.has(band)) result.rounds.set(band, createRoundTotals());
     countRound(result.rounds.get(band), shot, firstLeave);
-    result.okDistances.add(shot.okRadius ?? (shot.model === 1 ? 1 : shot.model >= 2 ? 0.5 : null));
     if (shot.testHole && shot.sessionId) {
       if (!result.tests.has(shot.sessionId)) result.tests.set(shot.sessionId, new Map());
       result.tests.get(shot.sessionId).set(shot.testHole, shot.roundScore);
@@ -120,7 +119,7 @@ export function createAnalysis({ sessionId = "", rejudge = false } = {}) {
 
 export function addComparisonShot(bands, shot, greenSpeed, rejudge) {
   if (shot.greenSpeed !== greenSpeed) return;
-  const outcome = rejudge ? evaluatePutt(shot, shot.target, shot.greenSpeed, shot.okRadius).outcome : shot.outcome;
+  const outcome = rejudge ? evaluatePutt(shot, shot.target, shot.greenSpeed).outcome : shot.outcome;
   if (outcome === "unjudged") return;
   const band = distanceBand(shot.target);
   if (!bands.has(band)) bands.set(band, { judged: 0, holed: 0 });

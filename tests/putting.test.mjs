@@ -19,13 +19,13 @@ test("uses green speed and lateral offset for the capture limit", () => {
   assert.equal(evaluatePutt({ distance: 10, angle: 0 }, 3, 244).reason, "pace");
 });
 
-test("records an uncaptured putt within fifty centimetres as a separate outcome", () => {
-  assert.equal(classifyLeave(0.5), "concede");
-  assert.equal(classifyLeave(0.5001), "miss");
+test("records an uncaptured putt within seventy centimetres as a separate outcome", () => {
+  assert.equal(classifyLeave(0.7), "concede");
+  assert.equal(classifyLeave(0.7001), "miss");
   assert.equal(evaluatePutt({ distance: 2.5, angle: 0 }, 3, 244).outcome, "concede");
-  assert.equal(evaluatePutt({ distance: 2.49, angle: 0 }, 3, 244).outcome, "miss");
+  assert.equal(evaluatePutt({ distance: 2.29, angle: 0 }, 3, 244).outcome, "miss");
   assert.equal(evaluatePutt({ distance: 3.45, angle: 1.5 }, 3, 244).outcome, "concede");
-  assert.equal(evaluatePutt({ distance: 3.51, angle: 1.5 }, 3, 244).outcome, "miss");
+  assert.equal(evaluatePutt({ distance: 3.75, angle: 1.5 }, 3, 244).outcome, "miss");
   assert.equal(evaluatePutt({ distance: 4, angle: 2 }, 3, 244).outcome, "miss");
   assert.equal(evaluatePutt({ distance: 2, angle: 0 }, 3, 244).outcome, "miss");
   assert.equal(evaluatePutt({ distance: 3, angle: 2 }, 3, 244).outcome, "concede");
@@ -53,12 +53,11 @@ test("prefixes signed angles with the direction letter", () => {
   assert.equal(formatAngle(0), "0.00");
 });
 
-test("supports hole-out with a smaller gimme or a putt from inside fifty centimetres", () => {
-  assert.equal(evaluatePutt({ distance: 2.7, angle: 0 }, 3, 244, 0).outcome, "miss");
-  assert.equal(evaluatePutt({ distance: 2.71, angle: 0 }, 3, 244, 0.3).outcome, "concede");
-  assert.equal(evaluatePutt({ distance: 2.69, angle: 0 }, 3, 244, 0.3).outcome, "miss");
-  assert.equal(evaluatePutt({ distance: 0.2, angle: 0 }, 0.2, 244, 0).outcome, "holed");
-  assert.equal(evaluatePutt({ distance: 0.03, angle: 0 }, 0.03, 244, 0).outcome, "holed");
+test("uses the same fixed OK distance for hole-out and regular practice", () => {
+  assert.equal(evaluatePutt({ distance: 2.5, angle: 0 }, 3, 244).outcome, "concede");
+  assert.equal(evaluatePutt({ distance: 2.29, angle: 0 }, 3, 244).outcome, "miss");
+  assert.equal(evaluatePutt({ distance: 0.2, angle: 0 }, 0.2, 244).outcome, "holed");
+  assert.equal(evaluatePutt({ distance: 0.03, angle: 0 }, 0.03, 244).outcome, "holed");
 });
 
 test("reports distance, direction and leave from the shot that was played", () => {

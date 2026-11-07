@@ -25,12 +25,12 @@ test("projects stops with right and over positive and ignores angle error marker
 test("round analysis uses the first leave and recorded score, even during rejudging", () => {
   const analysis = createAnalysis({ rejudge: true });
   analysis.add({ ...base, outcome: "concede", distance: 2.2, model: 1, roundScore: 2, roundStart: 4,
-    roundFirstLeave: 0.8, roundStroke: 1, testHole: 1, sessionId: "test" });
+    roundFirstLeave: 0.8, roundStroke: 1, testHole: 1, sessionId: "test", okRadius: 1 });
   assert.equal(analysis.result.changed, 1);
   assert.equal(analysis.result.rounds.get(4).firstLeave, 0.8);
   assert.equal(analysis.result.rounds.get(4).strokes, 2);
   assert.equal(analysis.result.tests.get("test").get(1), 2);
-  assert.deepEqual([...analysis.result.okDistances], [1]);
+  assert.equal(analysis.result.displayed.miss, 1);
 });
 
 test("compares only matching green speeds and shows a nonzero interval for a small perfect sample", () => {

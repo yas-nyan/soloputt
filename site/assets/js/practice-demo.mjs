@@ -1,10 +1,12 @@
+import { OK_DISTANCE } from "./putting.mjs";
+
 export const DEMO_GREEN_SPEED = 244;
 
 function angleForOffset(offset, target) {
   return Math.asin(offset / target) * 180 / Math.PI;
 }
 
-export function demoShot(outcome, target, random = Math.random, okDistance = 0.5) {
+export function demoShot(outcome, target, random = Math.random) {
   const side = random() < 0.5 ? -1 : 1;
   let distance;
   let angle;
@@ -23,7 +25,7 @@ export function demoShot(outcome, target, random = Math.random, okDistance = 0.5
     const isOK = outcome === "concede";
     const maximumAngle = isOK ? angleForOffset(Math.min(0.16, target * 0.16), target) : 8.8;
     angle = minimumAngle + random() * (maximumAngle - minimumAngle);
-    const gap = isOK ? okDistance * (0.39 + random() * 0.29) : 0.65 + random() * 1.05;
+    const gap = isOK ? OK_DISTANCE * (0.39 + random() * 0.29) : 0.85 + random() * 1.05;
     const short = target - gap >= 0.1 && random() < 0.5;
     distance = target + (short ? -gap : gap);
   }
