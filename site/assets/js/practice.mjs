@@ -85,8 +85,9 @@ export function setupPractice() {
   function showTarget() {
     hideFeedback();
     if (demo) setDemoBusy(false);
-    field("target").textContent = target.toFixed(round?.strokes ? 2 : 1);
+    field("distance-label").textContent = "目標距離";
     field("remaining").textContent = target.toFixed(2);
+    field("shot-distance-progress").textContent = "—";
     const range = `${distanceRange.min.toFixed(1)}〜${distanceRange.max.toFixed(1)} m`;
     const roundLabel = test ? "20ホール" : "ホールアウト";
     field("scenario-label").textContent = round ? randomDistance ? `${roundLabel} · ${range}` : roundLabel
@@ -215,6 +216,7 @@ export function setupPractice() {
 
   function animate(shot, result, roundResult) {
     hideFeedback();
+    field("distance-label").textContent = "残り距離";
     const scale = (BALL_Y - CUP_Y) / target;
     const capture = result.outcome === "holed";
     const fraction = shot.distance > 0 ? 1 - Math.sqrt(Math.max(0, 1 - result.travel / shot.distance)) : 0;
@@ -223,6 +225,8 @@ export function setupPractice() {
     function draw(progress) {
       const phase = progress * fraction;
       const distance = shot.distance * (2 * phase - phase ** 2);
+      const distanceProgress = result.travel > 0 ? Math.min(1, distance / result.travel) : progress;
+      field("shot-distance-progress").textContent = (shot.distance * distanceProgress).toFixed(2);
       const caught = progress === 1 && capture;
       const x = caught ? BALL_X : BALL_X + result.lateral * distance * scale;
       const y = caught ? CUP_Y : BALL_Y - result.forward * distance * scale;
