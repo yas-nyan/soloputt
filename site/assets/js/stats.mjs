@@ -1,3 +1,4 @@
+import { createDemoReader } from "./demo-stats.mjs";
 import { setupCSVTools } from "./csv-tools.mjs";
 import { formatAngle, OUTCOME_LABELS } from "./putting.mjs";
 import { readStatsPage } from "./shot-store.mjs";
@@ -19,6 +20,7 @@ let page;
 let selectedRange;
 let selectedTotal;
 let requestId = 0;
+let demoReader;
 
 function rate(count, total) {
   return total ? `${Math.round(100 * count / total)}%` : "—";
@@ -175,7 +177,8 @@ async function load(options) {
   }
 
   try {
-    const result = await readStatsPage(scenario, { ...options, dateRange, includeStats: !options });
+    const readPage = demoReader ?? readStatsPage;
+    const result = await readPage(scenario, { ...options, dateRange, includeStats: !options });
     if (id !== requestId) return;
     page = result;
     selectedRange = dateRange;
@@ -212,5 +215,13 @@ period.addEventListener("change", updatePeriod);
 from.addEventListener("change", () => load());
 to.addEventListener("change", () => load());
 window.addEventListener("pageshow", updatePeriod);
+
+field("demo-toggle").addEventListener("click", (event) => {
+  demoReader = demoReader ? undefined : createDemoReader();
+  event.currentTarget.textContent = demoReader ? "実打の記録に戻る" : "サンプル統計を見る";
+  field("demo-status").textContent = demoReader ? "サンプル1,000球を表示中" : "実打の記録を表示中";
+  field("csv-tools").hidden = Boolean(demoReader);
+  load();
+});
 
 setupCSVTools(() => load());

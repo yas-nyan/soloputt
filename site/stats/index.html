@@ -49,7 +49,14 @@
         </fieldset>
       </div>
     </section>
-    <section class="panel csv-tools" aria-labelledby="csv-heading">
+    <div class="panel demo-tools row">
+      <div>
+        <p id="demo-status" role="status">実打の記録を表示中</p>
+        <p class="note">サンプルは実打履歴と分けて表示します。</p>
+      </div>
+      <button id="demo-toggle" type="button" class="secondary">サンプル統計を見る</button>
+    </div>
+    <section id="csv-tools" class="panel csv-tools" aria-labelledby="csv-heading">
       <div class="row">
         <div>
           <h2 id="csv-heading">履歴のCSV</h2>

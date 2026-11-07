@@ -126,7 +126,7 @@ details .note { margin-top: .5rem; }
 .stat-cards dt { color: var(--text-muted); }
 .stat-cards dd { font-size: clamp(1.2rem, 4vw, 2.5rem); }
 .stat-cards .stat-note { font-size: .75rem; font-weight: 400; color: var(--text-muted); }
-.stats-section, .csv-tools { margin-bottom: .7rem; }
+.stats-section, .csv-tools, .demo-tools { margin-bottom: .7rem; }
 #csv-status:not(:empty) { margin-top: .4rem; }
 #csv-status[data-error="true"] { color: #8a4524; }
 .table-wrap { margin-block: .55rem .4rem; overflow-x: auto; }
@@ -220,3 +220,5 @@ tbody tr:hover { background: #eaf0e4; }
 .finish-totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.3rem, 1fr)); gap: .4rem; margin-block: .7rem .45rem; }
 .finish-totals > div { padding: .45rem .55rem; border-radius: .45rem; color: var(--tone-ink, #42564c); background: var(--tone-bg, #e8eee8); }
 .finish-totals dd { font-size: 1rem; }
+
+#demo-status { font-size: .88rem; font-weight: 750; }
