@@ -1,6 +1,7 @@
 import { lineReader, NOTIFY, parseSettings, parseShot, screenGreenSpeedWrite, SERVICE, WRITE } from "./protocol.mjs";
 
 const encoder = new TextEncoder();
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export function chooseDevice(bluetooth, showAll = false) {
   const discovery = showAll
@@ -47,7 +48,7 @@ export class ZeroPuttConnection {
 
     status("初期化中");
     await this.#exchange("6", "6,");
-    await new Promise((resolve) => setTimeout(resolve, 7000));
+    await delay(7000);
     this.#assertOpen();
     await this.#exchange("2", "3,");
     this.#assertOpen();
@@ -67,12 +68,22 @@ export class ZeroPuttConnection {
       const current = await this.#readSettings();
       const command = screenGreenSpeedWrite(current, speed);
       if (speed === current.greenSpeed) return current;
+
+      // Match the spacing observed in the official screen-mode settings flow.
+      await delay(2000);
       await this.#send(command, "設定データ");
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await delay(700);
+      const applied = await this.#readSettings();
+      if (applied.greenMode !== current.greenMode || applied.greenSpeed !== speed) {
+        throw new Error(`変更が反映されませんでした。目標 ${speed}、本体 ${applied.greenSpeed}（保存指示は未送信）`);
+      }
+
+      await delay(300);
       await this.#send("c,1");
+      await delay(1000);
       const verified = await this.#readSettings();
       if (verified.greenMode !== current.greenMode || verified.greenSpeed !== speed) {
-        throw new Error("読み戻した値が設定したグリーン速度と一致しません");
+        throw new Error(`保存指示の後に読み戻した値が一致しません。目標 ${speed}、本体 ${verified.greenSpeed}`);
       }
       return verified;
     } finally {

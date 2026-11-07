@@ -70,6 +70,7 @@ for (const method of ["writeValueWithResponse", "writeValue"]) {
     let subscribed = false;
     let deviceSettings = settingsFixture;
     let acceptSettingsWrite = true;
+    let revertOnCommit = false;
     notify.startNotifications = async () => { subscribed = true; };
 
     function emit(text) {
@@ -87,6 +88,7 @@ for (const method of ["writeValueWithResponse", "writeValue"]) {
         if (command === `${speedWrite}\n` && acceptSettingsWrite) {
           deviceSettings = settingsFixture.replace(",244,", ",305,");
         }
+        if (command === "c,1\n" && revertOnCommit) deviceSettings = settingsFixture;
       },
     };
     const device = new EventTarget();
@@ -129,24 +131,48 @@ for (const method of ["writeValueWithResponse", "writeValue"]) {
     assert.deepEqual(sent, ["6\n", "2\n", "9\n", "B\n"]);
     assert.deepEqual(shots, [expectedShot]);
 
+    async function advance(ms) {
+      t.mock.timers.tick(ms);
+      await setImmediate();
+    }
+
     assert.equal((await session.readSettings()).greenSpeed, "244");
     const saving = session.saveScreenGreenSpeed("305");
     await assert.rejects(session.readSettings(), /処理中/);
     await setImmediate();
+    await advance(1999);
+    assert.deepEqual(sent.slice(4), ["2\n", "2\n"]);
+    await advance(1);
     assert.deepEqual(sent.slice(4), ["2\n", "2\n", `${speedWrite}\n`]);
-    t.mock.timers.tick(999);
-    await setImmediate();
+    await advance(700);
+    assert.equal(sent.at(-1), "2\n");
+    await advance(299);
     assert.equal(sent.includes("c,1\n"), false);
-    t.mock.timers.tick(1);
+    await advance(1);
+    assert.equal(sent.at(-1), "c,1\n");
+    await advance(1000);
     assert.equal((await saving).greenSpeed, "305");
     assert.deepEqual(sent.slice(-2), ["c,1\n", "2\n"]);
 
     deviceSettings = settingsFixture;
     acceptSettingsWrite = false;
-    const mismatch = assert.rejects(session.saveScreenGreenSpeed("305"), /一致しません/);
+    const failedStart = sent.length;
+    const mismatch = assert.rejects(session.saveScreenGreenSpeed("305"), /保存指示は未送信/);
     await setImmediate();
-    t.mock.timers.tick(1000);
+    await advance(2000);
+    await advance(700);
     await mismatch;
+    assert.deepEqual(sent.slice(failedStart), ["2\n", `${speedWrite}\n`, "2\n"]);
+
+    acceptSettingsWrite = true;
+    revertOnCommit = true;
+    const commitMismatch = assert.rejects(session.saveScreenGreenSpeed("305"), /保存指示の後.*一致しません/);
+    await setImmediate();
+    await advance(2000);
+    await advance(700);
+    await advance(300);
+    await advance(1000);
+    await commitMismatch;
     assert.equal((await session.readSettings()).greenSpeed, "244");
 
     session.close();
