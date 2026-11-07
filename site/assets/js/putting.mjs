@@ -55,3 +55,14 @@ export function formatAngle(angle) {
   if (angle === 0) return "0.00";
   return `${angle < 0 ? "L" : "R"}${Math.abs(angle).toFixed(2)}`;
 }
+
+export function formatShotSummary(shot, target, remaining) {
+  const difference = shot.distance - target;
+  const cm = Math.round(Math.abs(difference) * 100);
+  const pace = !Number.isFinite(difference) || shot.distance < 0 ? "前後不明"
+    : cm === 0 ? "目標どおり" : `${cm} cm${difference < 0 ? "ショート" : "オーバー"}`;
+  const direction = !Number.isFinite(shot.angle) || shot.angle === 10 ? "方向不明"
+    : shot.angle === 0 ? "真っすぐ" : `${shot.angle < 0 ? "左" : "右"}に打ち出し`;
+  const leave = Number.isFinite(remaining) ? `${Math.round(remaining * 100)} cm` : "—";
+  return `${pace} ／ ${direction} ／ 残り${leave}`;
+}

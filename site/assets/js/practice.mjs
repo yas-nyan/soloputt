@@ -1,6 +1,6 @@
 import { setupPracticeSession } from "./practice-session.mjs";
 import { recordStroke } from "./finish-round.mjs";
-import { DEFAULT_OK_DISTANCE, evaluatePutt, formatAngle, OUTCOME_LABELS, randomTarget, SHOT_MODEL_VERSION } from "./putting.mjs";
+import { DEFAULT_OK_DISTANCE, evaluatePutt, formatAngle, formatShotSummary, OUTCOME_LABELS, randomTarget, SHOT_MODEL_VERSION } from "./putting.mjs";
 import { DEMO_GREEN_SPEED, demoShot } from "./practice-demo.mjs";
 import { saveShot } from "./shot-store.mjs";
 
@@ -271,6 +271,9 @@ export function setupPractice() {
     }
     stopAnimation();
     const result = evaluatePutt(shot, target, greenSpeed, okDistance);
+    const summary = field("green-shot-summary");
+    summary.textContent = formatShotSummary(shot, target, result.remaining);
+    summary.hidden = false;
     const stroke = round ? recordStroke(round.strokes, result.outcome) : null;
     if (stroke) {
       if (stroke.stroke === 1) {
@@ -290,7 +293,8 @@ export function setupPractice() {
     }
     field("shot-outcome").textContent = OUTCOME_LABELS[result.outcome];
     field("shot-outcome").dataset.outcome = result.outcome;
-    field("shot-reason").textContent = REASONS[result.reason] ?? "カップに収まりました";
+    const reason = result.reason === "line" && shot.distance < target ? "short" : result.reason;
+    field("shot-reason").textContent = REASONS[reason] ?? "カップに収まりました";
     field("shot-distance").textContent = shot.distance.toFixed(2);
     const angle = shot.angle === 10 ? "エラー" : formatAngle(shot.angle);
     field("shot-angle").textContent = angle;
@@ -336,6 +340,8 @@ export function setupPractice() {
     demoShots = 0;
     field("shot-count").textContent = `${enabled ? demoShots : shots} 球`;
     field("shot-target").textContent = "目標 —";
+    field("green-shot-summary").hidden = true;
+    field("green-shot-summary").textContent = "";
     field("shot-outcome").textContent = "受信待ち";
     delete field("shot-outcome").dataset.outcome;
     field("shot-reason").textContent = enabled ? "結果ボタンからパットを再生できます。" : "打つとここに結果を表示します。";

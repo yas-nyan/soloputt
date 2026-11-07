@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { classifyLeave, evaluatePutt, formatAngle, randomTarget } from "../site/assets/js/putting.mjs";
+import { classifyLeave, evaluatePutt, formatAngle, formatShotSummary, randomTarget } from "../site/assets/js/putting.mjs";
 
 test("uses cup entry rather than requiring the ball to reach the centre", () => {
   const hit = evaluatePutt({ distance: 2.95, angle: 0 }, 3, 244);
@@ -59,4 +59,13 @@ test("supports hole-out with a smaller gimme or a putt from inside fifty centime
   assert.equal(evaluatePutt({ distance: 2.69, angle: 0 }, 3, 244, 0.3).outcome, "miss");
   assert.equal(evaluatePutt({ distance: 0.2, angle: 0 }, 0.2, 244, 0).outcome, "holed");
   assert.equal(evaluatePutt({ distance: 0.03, angle: 0 }, 0.03, 244, 0).outcome, "holed");
+});
+
+test("reports distance, direction and leave from the shot that was played", () => {
+  assert.equal(formatShotSummary({ distance: 1.62, angle: -2 }, 1.9, 0.29),
+    "28 cmショート ／ 左に打ち出し ／ 残り29 cm");
+  assert.equal(formatShotSummary({ distance: 2.1, angle: 0.5 }, 1.9, 0),
+    "20 cmオーバー ／ 右に打ち出し ／ 残り0 cm");
+  assert.equal(formatShotSummary({ distance: 1.9, angle: 10 }, 1.9, undefined),
+    "目標どおり ／ 方向不明 ／ 残り—");
 });

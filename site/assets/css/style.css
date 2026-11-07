@@ -53,6 +53,17 @@ select { color: inherit; padding: .35rem .6rem; border: 1px solid #b9ccbc; backg
 .console-top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .4rem 1rem; align-items: center; margin-bottom: .9rem; }
 .console-kicker { color: #b8d399; }
 .console-top h2 { margin-top: .15rem; }
+.green-shot-summary {
+  margin-bottom: .6rem;
+  padding: .35rem .6rem;
+  border-radius: .45rem;
+  background: #294a37;
+  color: #edf5dc;
+  font-size: clamp(.72rem, 2.7vw, .92rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
 .console-status { border-radius: 2rem; padding: .23rem .65rem; font-size: .81rem; font-weight: 750; color: var(--lime); background: #254132; }
 .console-body { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr); gap: clamp(.7rem, 2vw, 1.2rem); }
 .course { min-width: 0; align-self: center; position: relative; }
