@@ -21,7 +21,7 @@
       <div>
         <p class="eyebrow">PRACTICE RECORD</p>
         <h1 id="page-title">練習の記録</h1>
-        <p>目標距離ごとのカップイン率、OK圏内率、カップまでの残り距離。</p>
+        <p>距離ごとの成績と、打ち出し方向のばらつき。</p>
       </div>
       <label class="stats-filter" for="scenario-filter">練習メニュー
         <select id="scenario-filter">
@@ -47,18 +47,38 @@
             <tbody id="distance-stats"></tbody>
           </table>
         </div>
-        <p class="note">OK圏内はカップインせず、停止位置がカップから1 m未満の球です。判定対象外の球は各率と平均残り距離から除きます。</p>
+        <p class="note">距離帯は下限を含み、上限を含みません。OK圏内はカップから1 m未満で止まった球です。判定対象外の球は各率と平均残り距離から除きます。</p>
+      </section>
+      <section class="panel stats-section" aria-labelledby="direction-heading">
+        <div class="panel-heading"><p class="eyebrow">START LINE</p><h2 id="direction-heading">打ち出し方向の分布</h2></div>
+        <dl class="direction-sides">
+          <div><dt>左</dt><dd id="direction-left">—</dd></div>
+          <div><dt>中央（±0.25°以内）</dt><dd id="direction-centre">—</dd></div>
+          <div><dt>右</dt><dd id="direction-right">—</dd></div>
+        </dl>
+        <div id="direction-chart" class="table-wrap" tabindex="0" role="region" aria-labelledby="direction-heading">
+          <table class="direction-table">
+            <thead><tr><th scope="col">左（球）</th><th scope="col">打ち出し角</th><th scope="col">右（球）</th></tr></thead>
+            <tbody id="direction-stats"></tbody>
+          </table>
+        </div>
+        <p id="direction-empty" class="note" hidden>有効な角度の記録がありません。</p>
+        <p class="note">バーの長さは球数に比例します。角度帯は上限を含み、角度エラーは除いています。</p>
       </section>
       <section class="panel stats-section" aria-labelledby="history-heading">
         <div class="row">
-          <div class="panel-heading"><p class="eyebrow">RECENT PUTTS</p><h2 id="history-heading">ショット履歴</h2></div>
-          <span id="history-count" class="note"></span>
+          <div class="panel-heading"><p class="eyebrow">PUTT HISTORY</p><h2 id="history-heading" tabindex="-1">ショット履歴</h2></div>
+          <span id="history-count" class="note" role="status"></span>
         </div>
         <div class="table-wrap" tabindex="0" role="region" aria-labelledby="history-heading">
           <table>
             <thead><tr><th scope="col">日時</th><th scope="col">練習</th><th scope="col">目標</th><th scope="col">結果</th><th scope="col">推定距離</th><th scope="col">方向</th><th scope="col">表示速度</th><th scope="col">残り</th></tr></thead>
             <tbody id="history"></tbody>
           </table>
+        </div>
+        <div class="history-pages" role="group" aria-label="履歴のページ送り">
+          <button id="history-newer" class="secondary" type="button" disabled>← 新しい球</button>
+          <button id="history-older" class="secondary" type="button" disabled>古い球 →</button>
         </div>
       </section>
     </div>
