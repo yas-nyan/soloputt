@@ -26,19 +26,23 @@
     <div class="about-grid">
       <section class="panel article" aria-labelledby="use-heading">
         <h2 id="use-heading">使い方</h2>
-        <p>MacのChromeまたはiPadのBluefyで開き、練習ページからZeroPuttを接続します。固定距離・ランダム・ホールアウトから選んで打つと、転がりと結果が表示されます。</p>
-        <p>機器なしでも「デモを試す」でカップイン・OK・ミスや、ホールアウトの流れを再生できます。</p>
-        <p>統計やAboutへ移動すると、練習ページでのBLE接続は終了します。練習へ戻ったら再接続してください。</p>
+        <p>MacではChrome、iPadではBluefyで開き、練習ページからZeroPuttに接続します。固定距離・ランダム・ホールアウトを選んで打つと、転がりと結果が表示されます。</p>
+        <p>機器なしでも「デモを試す」でカップイン・OK・ミスを再生できます。</p>
       </section>
       <section class="panel article" aria-labelledby="model-heading">
         <h2 id="model-heading">カップインの判定</h2>
         <p>平坦なグリーンを想定し、本体の推定距離・角度・グリーン速度から、ボールがカップの縁に到達する速度と横ずれを求めます。Pennerの論文に掲載された捕球限界の近似式を使った、SoloPutt独自の判定です。</p>
-        <p>カップに入らず、停止位置からカップまでが50 cm以内ならOK圏内として記録します。</p>
+        <p>ホールアウトではOKの距離を選べます。OKで終えた場合は実際に打った数に1打を足して記録します。</p>
         <p><a href="https://doi.org/10.1139/p01-137">A. R. Penner, The physics of putting（2002年）</a></p>
+      </section>
+      <section class="panel article" aria-labelledby="analysis-heading">
+        <h2 id="analysis-heading">練習を振り返る</h2>
+        <p>セッションを記録すると、10球ごとに方向と距離感の変化を見られます。統計ページの「詳しい分析」では、停止位置の散布図、開始距離別の打数、同じグリーン速度での日付比較を確認できます。</p>
+        <p>機器なしで試したいときは「サンプル統計を見る」を選んでください。</p>
       </section>
       <section class="panel article" aria-labelledby="privacy-heading">
         <h2 id="privacy-heading">ショットの保存先</h2>
-        <p>練習履歴はこのサイトを開いたブラウザ内に保存されます。ショットは外部へ送信されず、端末間で同期されません。サイトデータを消去すると履歴も消えます。</p>
+        <p>練習履歴はこのサイトを開いたブラウザ内に保存されます。ショットは外部へ送信されず、端末間で同期されません。統計ページからCSVで持ち出したり、不要な球を削除したりできます。</p>
       </section>
       <section class="panel article" aria-labelledby="project-heading">
         <h2 id="project-heading">開発とソースコード</h2>
