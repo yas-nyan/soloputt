@@ -48,7 +48,7 @@ button {
   cursor: pointer;
 }
 
-#disconnect { background: #fff; color: #154e36; }
+#disconnect, #scan-all { background: #fff; color: #154e36; }
 button:disabled { opacity: .55; cursor: default; }
 button:focus-visible, summary:focus-visible { outline: 3px solid #17653f; outline-offset: 3px; }
 .note { color: #405d50; font-size: .85rem; }

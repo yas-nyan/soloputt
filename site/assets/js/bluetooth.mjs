@@ -2,11 +2,11 @@ import { lineReader, NOTIFY, parseShot, SERVICE, WRITE } from "./protocol.mjs";
 
 const encoder = new TextEncoder();
 
-export function chooseDevice(bluetooth) {
-  return bluetooth.requestDevice({
-    filters: [{ namePrefix: "Zeroputt" }, { services: [SERVICE] }],
-    optionalServices: [SERVICE],
-  });
+export function chooseDevice(bluetooth, showAll = false) {
+  const discovery = showAll
+    ? { acceptAllDevices: true }
+    : { filters: [{ namePrefix: "Zeroputt" }, { services: [SERVICE] }] };
+  return bluetooth.requestDevice({ ...discovery, optionalServices: [SERVICE] });
 }
 
 export class ZeroPuttConnection {

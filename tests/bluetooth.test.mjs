@@ -35,6 +35,14 @@ test("device picker can find Zeroputt by name and grants access to its custom se
   });
 });
 
+test("unfiltered device picker still grants access to the custom service", async () => {
+  await chooseDevice({
+    requestDevice(options) {
+      assert.deepEqual(options, { acceptAllDevices: true, optionalServices: [SERVICE] });
+    },
+  }, true);
+});
+
 for (const method of ["writeValueWithResponse", "writeValue"]) {
   test(`initializes and acknowledges measurements and heartbeat via ${method}`, async (t) => {
     t.mock.timers.enable({ apis: ["setTimeout"] });

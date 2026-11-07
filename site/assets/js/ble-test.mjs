@@ -1,6 +1,7 @@
 import { chooseDevice, ZeroPuttConnection } from "./bluetooth.mjs";
 
 const connect = document.querySelector("#connect");
+const scanAll = document.querySelector("#scan-all");
 const disconnect = document.querySelector("#disconnect");
 const status = document.querySelector("#status");
 const logList = document.querySelector("#log");
@@ -40,13 +41,18 @@ function resetReadout() {
   logList.replaceChildren();
 }
 
-connect.addEventListener("click", async () => {
-  connect.disabled = true;
+function setDiscoveryDisabled(disabled) {
+  connect.disabled = disabled;
+  scanAll.disabled = disabled;
+}
+
+async function connectDevice(showAll) {
+  setDiscoveryDisabled(true);
   resetReadout();
   setStatus("機器を選択してください", "working");
   let current;
   try {
-    const device = await chooseDevice(navigator.bluetooth);
+    const device = await chooseDevice(navigator.bluetooth, showAll);
     current = new ZeroPuttConnection(device, {
       status(message) {
         if (message === "初期化中") disconnect.disabled = false;
@@ -58,7 +64,7 @@ connect.addEventListener("click", async () => {
         if (connection !== current) return;
         connection = undefined;
         disconnect.disabled = true;
-        connect.disabled = false;
+        setDiscoveryDisabled(false);
         setStatus(message);
         log(message);
       },
@@ -75,15 +81,17 @@ connect.addEventListener("click", async () => {
     } else {
       setStatus(message);
       log(message);
-      connect.disabled = false;
+      setDiscoveryDisabled(false);
     }
   }
-});
+}
 
+connect.addEventListener("click", () => connectDevice(false));
+scanAll.addEventListener("click", () => connectDevice(true));
 disconnect.addEventListener("click", () => connection?.close());
 
 if (!window.isSecureContext || typeof navigator.bluetooth?.requestDevice !== "function") {
-  connect.disabled = true;
+  setDiscoveryDisabled(true);
   setStatus("このページではBLE接続を利用できません");
   document.querySelector("#compatibility").hidden = false;
 }
