@@ -39,3 +39,11 @@ test("CSV imports legacy columns and preserves completed round metadata", () => 
   assert.deepEqual(parseShotCSV(`${header}\n${shotToCSV(round)}`), [round]);
   assert.throws(() => parseShotCSV(`${header}\n${shotToCSV({ ...round, roundScore: 2 })}`), /roundScore/);
 });
+
+test("CSV round-trips session metadata with commas, quotes and leading formula markers", () => {
+  const tagged = { ...shot, sessionId: "00000000-0000-4000-8000-000000000010",
+    sessionTheme: '距離感, "前半"', sessionPutter: "=1+1", sessionMat: "'マット" };
+  const row = shotToCSV(tagged);
+  assert.ok(row.includes("'=1+1"));
+  assert.deepEqual(parseShotCSV(`${header}\n${row}`), [tagged]);
+});

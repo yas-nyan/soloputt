@@ -132,6 +132,22 @@
       </section>
     </div>
 
+    <details class="panel session-panel">
+      <summary>練習セッション</summary>
+      <form id="session-form">
+        <div class="session-fields">
+          <label>テーマ<input id="session-theme" maxlength="60" placeholder="例：距離感"></label>
+          <label>パター<input id="session-putter" maxlength="60"></label>
+          <label>マット<input id="session-mat" maxlength="60"></label>
+        </div>
+        <div class="actions">
+          <button type="submit" id="session-start" class="secondary">セッションを開始</button>
+          <button type="button" id="session-end" class="secondary" disabled>終了</button>
+        </div>
+        <p id="session-status" class="note" role="status"></p>
+      </form>
+    </details>
+
     <div class="utility-bar">
       <p>パットはこのブラウザに自動で記録されます。</p>
       <button id="open-device-settings" class="secondary" type="button" aria-controls="device-settings" aria-expanded="false" disabled>機器設定</button>

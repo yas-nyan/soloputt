@@ -1,3 +1,4 @@
+import { setupPracticeSession } from "./practice-session.mjs";
 import { recordStroke } from "./finish-round.mjs";
 import { evaluatePutt, formatAngle, OUTCOME_LABELS, randomTarget, SHOT_MODEL_VERSION } from "./putting.mjs";
 import { DEMO_GREEN_SPEED, demoShot } from "./practice-demo.mjs";
@@ -19,6 +20,7 @@ const REASONS = {
 export function setupPractice() {
   const field = (id) => document.getElementById(id);
   const form = field("practice-form");
+  const session = setupPracticeSession();
   const distance = field("target-range");
   const minimum = field("distance-min");
   const maximum = field("distance-max");
@@ -268,7 +270,7 @@ export function setupPractice() {
 
     if (!persist) return;
     saveShot({
-      time: Date.now(), target, scenario, greenSpeed, ...shot,
+      time: Date.now(), target, scenario, greenSpeed, ...shot, ...session.current,
       outcome: result.outcome, leave: result.remaining ?? null, model: SHOT_MODEL_VERSION,
       ...(stroke ? { roundId: (round.id ??= crypto.randomUUID()), roundStart: round.start, roundStroke: stroke.stroke, roundScore: stroke.score } : {}),
     }).catch(() => {
@@ -279,6 +281,7 @@ export function setupPractice() {
   function setDemo(enabled) {
     stopAnimation();
     demo = enabled;
+    session.setDemo(enabled);
     ready = enabled;
     pendingRound = undefined;
     round = undefined;

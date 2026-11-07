@@ -7,26 +7,35 @@ const ORIGINAL_FIELDS = [
 ];
 
 const ROUND_FIELDS = ["roundId", "roundStart", "roundStroke", "roundScore"];
-export const CSV_FIELDS = [...ORIGINAL_FIELDS, ...ROUND_FIELDS];
+const PRIOR_FIELDS = [...ORIGINAL_FIELDS, ...ROUND_FIELDS];
+const SESSION_FIELDS = ["sessionId", "sessionTheme", "sessionPutter", "sessionMat"];
+const TEXT_FIELDS = new Set(SESSION_FIELDS.slice(1));
+export const CSV_FIELDS = [...PRIOR_FIELDS, ...SESSION_FIELDS];
 const OPTIONAL_NUMBERS = new Set(["greenSpeed", "leave", "model", "roundStart", "roundStroke", "roundScore"]);
 const DECIMAL = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i;
 
 export function shotIdentity(shot) {
-  return JSON.stringify(CSV_FIELDS.map((field) => shot[field] ?? null));
+  return JSON.stringify(CSV_FIELDS.map((field) => (TEXT_FIELDS.has(field) ? shot[field] || null : shot[field] ?? null)));
 }
 
 export function shotToCSV(shot) {
-  return CSV_FIELDS.map((field) => field === "time" ? new Date(shot.time).toISOString() : shot[field] ?? "").join(",");
+  return CSV_FIELDS.map((field) => {
+    const value = field === "time" ? new Date(shot.time).toISOString() : String(shot[field] ?? "");
+    // Prevent spreadsheets from interpreting free-text metadata as formulas.
+    const safe = TEXT_FIELDS.has(field) && /^['=+@-]/.test(value) ? "'" + value : value;
+    return /[",]/.test(safe) ? '"' + safe.replaceAll('"', '""') + '"' : safe;
+  }).join(",");
 }
 
 function readRow(line) {
-  // All supported cells are scalars without commas, quotes or newlines.
-  return line.split(",").map((cell) => {
-    const value = cell.trim();
-    if (!value.includes('"')) return value;
-    if (/^"[^"]*"$/.test(value)) return value.slice(1, -1).trim();
-    throw new Error("引用符で囲まれた列の形式が不正です");
-  });
+  const cells = [];
+  const cell = /\s*(?:"((?:[^"]|"")*)"|([^",]*))\s*(,|$)/gy;
+  while (true) {
+    const match = cell.exec(line);
+    if (!match) throw new Error("引用符で囲まれた列の形式が不正です");
+    cells.push((match[1]?.replaceAll('""', '"') ?? match[2]).trim());
+    if (!match[3]) return cells;
+  }
 }
 
 function readValue(field, value) {
@@ -41,9 +50,14 @@ function readValue(field, value) {
     if (!["fixed", "random", "finish"].includes(value)) throw new Error("scenario の値が不正です");
     return value;
   }
-  if (field === "roundId") {
+  if (TEXT_FIELDS.has(field)) {
+    const text = /^'['=+@-]/.test(value) ? value.slice(1) : value;
+    if (text.length > 60) throw new Error(`${field} は60文字以内で指定してください`);
+    return text;
+  }
+  if (field === "roundId" || field === "sessionId") {
     if (!value) return null;
-    if (!/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(value)) throw new Error("roundId の形式が不正です");
+    if (!/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(value)) throw new Error(`${field} の形式が不正です`);
     return value;
   }
   if (field === "outcome") {
@@ -77,7 +91,7 @@ export function parseShotCSV(text) {
   const [first, ...lines] = text.replace(/^\uFEFF/, "").split(/\r\n?|\n/);
   const columns = readRow(first);
   const matches = (fields) => columns.length === fields.length && fields.every((field) => columns.includes(field));
-  if (!matches(ORIGINAL_FIELDS) && !matches(CSV_FIELDS)) {
+  if (!matches(ORIGINAL_FIELDS) && !matches(PRIOR_FIELDS) && !matches(CSV_FIELDS)) {
     throw new Error("CSVの列名が一致しません。SoloPuttが書き出したCSVをひな形にしてください");
   }
 
@@ -92,6 +106,10 @@ export function parseShotCSV(text) {
         throw new Error("OK圏内またはミスの球には leave が必要です");
       }
       validateRound(shot);
+      if (!shot.sessionId && [...TEXT_FIELDS].some((field) => shot[field])) throw new Error("テーマや用具には sessionId が必要です");
+      for (const field of SESSION_FIELDS) {
+        if (!shot[field]) delete shot[field];
+      }
       for (const field of ROUND_FIELDS) {
         if (shot[field] == null) delete shot[field];
       }
