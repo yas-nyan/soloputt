@@ -59,7 +59,9 @@ python3 -m http.server 8000 --bind 127.0.0.1 --directory site
 
 ## テスト
 
-Node.js 24以降で実行できます。
+プルリクエストではGitHub Actionsの **Tests** が自動で実行されます。**Actions → Tests → Run workflow** からテストだけを手動実行できます。GitHub Pagesへの公開前にも同じテストを実行します。
+
+ローカルではNode.js 24以降で実行できます。
 
 ```sh
 node --test 'tests/**/*.test.mjs'
