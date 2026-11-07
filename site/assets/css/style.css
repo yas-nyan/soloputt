@@ -133,9 +133,21 @@ details .note { margin-top: .5rem; }
 table { width: 100%; border-collapse: collapse; white-space: nowrap; font-size: .87rem; font-variant-numeric: tabular-nums; }
 th, td { text-align: left; border-bottom: 1px solid var(--line); padding: .53rem .65rem; }
 th { background: #e8eee1; font-size: .78rem; }
+tbody tr:nth-child(even) { background: #f1f4eb; }
+tbody tr:hover { background: #eaf0e4; }
+[data-tone] { --tone-ink: #42564c; --tone-bg: #e8eee8; }
+[data-tone="left"] { --tone-ink: #334e81; --tone-bg: #e6edf9; }
+[data-tone="right"] { --tone-ink: #604373; --tone-bg: #f0e8f4; }
+[data-tone="holed"] { --tone-ink: #185336; --tone-bg: #e0f1de; }
+[data-tone="concede"] { --tone-ink: #176064; --tone-bg: #dff1ef; }
+[data-tone="short"], [data-tone="miss"] { --tone-ink: #77521e; --tone-bg: #f8edd6; }
+[data-tone="over"] { --tone-ink: #823d30; --tone-bg: #f9e9e2; }
+.metric { display: inline-block; padding: .15rem .45rem; border-radius: .35rem; color: var(--tone-ink); background: var(--tone-bg); font-weight: 650; }
+.stat-accent { border-top: .25rem solid var(--tone-ink); }
+.stat-accent dd { color: var(--tone-ink); }
 .history-pages { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem; margin-top: .75rem; }
 .direction-sides { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: .4rem; margin-top: .75rem; text-align: center; }
-.direction-sides div { padding: .4rem .25rem; border-radius: .45rem; background: #edf1e7; }
+.direction-sides div { color: var(--tone-ink); padding: .4rem .25rem; border-radius: .45rem; background: var(--tone-bg); }
 .direction-sides dd { font-size: .88rem; }
 .direction-count { display: block; font-size: .73rem; font-weight: 600; }
 .direction-table { table-layout: fixed; }
@@ -145,8 +157,10 @@ th { background: #e8eee1; font-size: .78rem; }
 .direction-bar.right { grid-template-columns: minmax(0, 1fr) clamp(1.6rem, 5vw, 2.6rem); }
 .direction-track { position: relative; display: block; height: .85rem; border-radius: .25rem; background: #e8eee1; }
 .direction-bar.right .direction-track { grid-area: 1 / 1; }
-.direction-track > span { position: absolute; inset-block: 0; inset-inline-end: 0; border-radius: inherit; background: #4d755e; }
-.direction-bar.right .direction-track > span { inset-inline: 0 auto; background: #876647; }
+.direction-track > span { position: absolute; inset-block: 0; inset-inline-end: 0; border-radius: inherit; background: #526b9b; }
+.direction-bar.right .direction-track > span { inset-inline: 0 auto; background: #79618c; }
+#pace-chart .direction-track > span { background: #a67828; }
+#pace-chart .direction-bar.right .direction-track > span { background: #a2503d; }
 
 .article p { color: var(--text-muted); margin-top: .65rem; }
 .article a { color: var(--green); font-weight: 700; }

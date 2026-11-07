@@ -66,8 +66,8 @@
     <div id="stats-content" hidden>
       <dl class="stat-cards">
         <div class="panel"><dt>総パット数</dt><dd id="total">—</dd><dd id="judged" class="stat-note"></dd></div>
-        <div class="panel"><dt>カップイン率</dt><dd id="rate">—</dd><dd id="cup-count" class="stat-note"></dd></div>
-        <div class="panel"><dt>OK圏内率</dt><dd id="concede-rate">—</dd><dd id="concede-count" class="stat-note"></dd></div>
+        <div class="panel stat-accent" data-tone="holed"><dt>カップイン率</dt><dd id="rate">—</dd><dd id="cup-count" class="stat-note"></dd></div>
+        <div class="panel stat-accent" data-tone="concede"><dt>OK圏内率</dt><dd id="concede-rate">—</dd><dd id="concede-count" class="stat-note"></dd></div>
         <div class="panel"><dt>入らなかった球の平均残り</dt><dd id="average-leave">—</dd><dd class="stat-note">止まった位置からカップまで</dd></div>
       </dl>
       <section class="panel stats-section" aria-labelledby="daily-heading">
@@ -77,11 +77,11 @@
         </div>
         <div class="table-wrap" tabindex="0" role="region" aria-labelledby="daily-heading">
           <table>
-            <thead><tr><th scope="col">日付</th><th scope="col">球数</th><th scope="col">左</th><th scope="col">中央</th><th scope="col">右</th><th scope="col">ショート</th><th scope="col">オーバー</th><th scope="col">カップイン</th></tr></thead>
+            <thead><tr><th scope="col">日付</th><th scope="col">球数</th><th scope="col">左</th><th scope="col">中央</th><th scope="col">右</th><th scope="col">ショート</th><th scope="col">カップイン</th><th scope="col">オーバー</th></tr></thead>
             <tbody id="daily-stats"></tbody>
           </table>
         </div>
-        <p class="note">ブラウザの現地日付で集計します。方向は有効な角度、ショート・オーバーは有効な推定距離、カップイン率は判定対象の球が分母です。</p>
+        <p class="note">ブラウザの現地日付で集計します。方向は有効な角度、ショート・オーバーは入らなかった球の有効な推定距離、カップイン率は判定対象の球が分母です。</p>
       </section>
       <section class="panel stats-section" aria-labelledby="distance-heading">
         <div class="panel-heading"><p class="eyebrow">BY DISTANCE</p><h2 id="distance-heading">目標距離別</h2></div>
@@ -96,9 +96,9 @@
       <section class="panel stats-section" aria-labelledby="direction-heading">
         <div class="panel-heading"><p class="eyebrow">START LINE</p><h2 id="direction-heading">打ち出し方向の分布</h2></div>
         <dl class="direction-sides">
-          <div><dt>左</dt><dd id="direction-left">—</dd></div>
-          <div><dt>中央（±0.25°以内）</dt><dd id="direction-centre">—</dd></div>
-          <div><dt>右</dt><dd id="direction-right">—</dd></div>
+          <div data-tone="left"><dt>左</dt><dd id="direction-left">—</dd></div>
+          <div data-tone="neutral"><dt>中央（±0.25°以内）</dt><dd id="direction-centre">—</dd></div>
+          <div data-tone="right"><dt>右</dt><dd id="direction-right">—</dd></div>
         </dl>
         <div id="direction-chart" class="table-wrap" tabindex="0" role="region" aria-labelledby="direction-heading">
           <table class="direction-table">
@@ -112,9 +112,9 @@
       <section class="panel stats-section" aria-labelledby="pace-heading">
         <div class="panel-heading"><p class="eyebrow">DISTANCE CONTROL</p><h2 id="pace-heading">ショート・オーバーの分布</h2></div>
         <dl class="direction-sides">
-          <div><dt>ショート</dt><dd id="pace-left">—</dd></div>
-          <div><dt>目標の±0.10 m以内</dt><dd id="pace-centre">—</dd></div>
-          <div><dt>オーバー</dt><dd id="pace-right">—</dd></div>
+          <div data-tone="short"><dt>ショート</dt><dd id="pace-left">—</dd></div>
+          <div data-tone="holed"><dt>ジャスト（0〜+30 cm）</dt><dd id="pace-centre">—</dd></div>
+          <div data-tone="over"><dt>オーバー</dt><dd id="pace-right">—</dd></div>
         </dl>
         <div id="pace-chart" class="table-wrap" tabindex="0" role="region" aria-labelledby="pace-heading">
           <table class="direction-table">
@@ -123,7 +123,7 @@
           </table>
         </div>
         <p id="pace-empty" class="note" hidden>有効な推定距離の記録がありません。</p>
-        <p class="note">本体の推定転がり距離と目標距離の差を1 cm単位で集計します。カップインした球も推定距離で数えます。</p>
+        <p class="note">カップに入らなかった球の推定転がり距離を、目標距離との差で分類します。目標未満はショート、0〜+30 cmはジャスト、+30 cmを超えるとオーバーです。距離差は1 cm単位です。</p>
       </section>
       <section class="panel stats-section" aria-labelledby="history-heading">
         <div class="row">

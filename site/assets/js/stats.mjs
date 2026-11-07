@@ -43,6 +43,14 @@ function renderRows(id, rows) {
   field(id).replaceChildren(fragment);
 }
 
+function metric(text, tone) {
+  const label = document.createElement("span");
+  label.className = "metric";
+  label.dataset.tone = tone;
+  label.textContent = text;
+  return label;
+}
+
 function renderDistribution(prefix, stats, bands) {
   const left = stats.left.reduce((total, count) => total + count, 0);
   const right = stats.right.reduce((total, count) => total + count, 0);
@@ -89,10 +97,10 @@ function renderDaily(daily, dateRange) {
     const paceTotal = stats.short + stats.onPace + stats.over;
     const judged = stats.holed + stats.conceded + stats.missed;
     return [
-      date.format(day), stats.total, rateWithCount(stats.left, angleTotal),
-      rateWithCount(stats.centre, angleTotal), rateWithCount(stats.right, angleTotal),
-      rateWithCount(stats.short, paceTotal), rateWithCount(stats.over, paceTotal),
-      rateWithCount(stats.holed, judged),
+      date.format(day), stats.total, metric(rateWithCount(stats.left, angleTotal), "left"),
+      metric(rateWithCount(stats.centre, angleTotal), "neutral"), metric(rateWithCount(stats.right, angleTotal), "right"),
+      metric(rateWithCount(stats.short, paceTotal), "short"), metric(rateWithCount(stats.holed, judged), "holed"),
+      metric(rateWithCount(stats.over, paceTotal), "over"),
     ];
   }));
 }
@@ -113,8 +121,8 @@ function renderStats(stats, daily, dateRange) {
     const count = totals.holed + totals.conceded + totals.missed;
     return [
       `${lower.toFixed(1)}–${(lower + 0.5).toFixed(1)} m`, totals.total,
-      count ? `${rate(totals.holed, count)}（${totals.holed}/${count}）` : "—",
-      count ? `${rate(totals.conceded, count)}（${totals.conceded}/${count}）` : "—", averageLeave(totals),
+      count ? metric(`${rate(totals.holed, count)}（${totals.holed}/${count}）`, "holed") : "—",
+      count ? metric(`${rate(totals.conceded, count)}（${totals.conceded}/${count}）`, "concede") : "—", averageLeave(totals),
     ];
   }));
   renderDistribution("direction", stats, ANGLE_BANDS);
@@ -131,7 +139,7 @@ function renderHistory(history) {
   field("history-count").textContent = `このページ ${history.entries.length} / 全 ${selectedTotal} 球`;
   renderRows("history", history.entries.map(({ shot }) => [
     dateTime.format(shot.time), shot.scenario === "random" ? "ランダム" : "固定",
-    `${shot.target.toFixed(1)} m`, OUTCOME_LABELS[shot.outcome], `${shot.distance.toFixed(2)} m`,
+    `${shot.target.toFixed(1)} m`, metric(OUTCOME_LABELS[shot.outcome], shot.outcome), `${shot.distance.toFixed(2)} m`,
     shot.angle === 10 ? "エラー" : `${formatAngle(shot.angle)}°`,
     `${shot.speed.toFixed(2)} m/s`, shot.leave === null ? "—" : `${shot.leave.toFixed(2)} m`,
   ]));

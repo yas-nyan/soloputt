@@ -28,19 +28,20 @@ test("keeps centred, left and right angles separate at band boundaries", () => {
   assert.deepEqual(summary.right, [0, 1, 2, 1]);
 });
 
-test("counts short and long leaves using measured roll distance, independently of angle and outcome", () => {
+test("counts short, just and over separately from cup-ins", () => {
   const stats = createStats();
   const daily = createDailyStats();
   for (const shot of [
-    { target: 3, distance: 2.75, angle: 10, outcome: "unjudged" },
-    { target: 3, distance: 3.1, angle: -0.25, outcome: "holed" },
-    { target: 3, distance: 3.6, angle: 1, outcome: "concede", leave: 0.6 },
+    { target: 3, distance: 2.99, angle: 10, outcome: "unjudged" },
+    { target: 3, distance: 3, angle: -0.25, outcome: "concede", leave: 0.02 },
+    { target: 3, distance: 3.3, angle: 0.6, outcome: "concede", leave: 0.31 },
+    { target: 3, distance: 3.31, angle: 1, outcome: "concede", leave: 0.32 },
+    { target: 3, distance: 2.97, angle: 0, outcome: "holed" },
     { target: 3, distance: -1, angle: -0.3, outcome: "unjudged" },
   ]) {
     addShot(stats, shot);
     addDailyShot(daily, shot);
   }
-  assert.deepEqual(combineStats([stats]).pace, { centre: 1, left: [1, 0, 0, 0], right: [0, 0, 1, 0] });
-  assert.deepEqual([daily.short, daily.onPace, daily.over], [1, 1, 1]);
-  assert.deepEqual([daily.left, daily.centre, daily.right], [1, 1, 1]);
+  assert.deepEqual(combineStats([stats]).pace, { centre: 2, left: [1, 0, 0, 0], right: [0, 1, 0, 0] });
+  assert.deepEqual([daily.short, daily.onPace, daily.over, daily.holed], [1, 2, 1, 1]);
 });

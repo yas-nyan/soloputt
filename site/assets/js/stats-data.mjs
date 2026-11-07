@@ -7,9 +7,9 @@ export const ANGLE_BANDS = [
 ];
 
 export const PACE_BANDS = [
-  { maximum: 0.25, label: "0.10–0.25 m" },
-  { maximum: 0.5, label: "0.25–0.50 m" },
-  { maximum: 1, label: "0.50–1.00 m" },
+  { maximum: 0.3, label: "0–0.30 m" },
+  { maximum: 0.6, label: "0.30–0.60 m" },
+  { maximum: 1, label: "0.60–1.00 m" },
   { maximum: Infinity, label: "1 m超" },
 ];
 
@@ -45,15 +45,15 @@ function angleSide(angle) {
 }
 
 function paceDifference(shot) {
-  if (!Number.isFinite(shot.distance) || shot.distance < 0) return null;
+  if (shot.outcome === "holed" || !Number.isFinite(shot.distance) || shot.distance < 0) return null;
   const difference = shot.distance - shot.target;
   return Math.sign(difference) * Math.round(Math.abs(difference) * 100) / 100;
 }
 
 function paceSide(difference) {
   if (difference === null) return null;
-  if (Math.abs(difference) <= 0.1) return "centre";
-  return difference < 0 ? "left" : "right";
+  if (difference < 0) return "left";
+  return difference <= 0.3 ? "centre" : "right";
 }
 
 function countBand(stats, side, magnitude, bands) {
