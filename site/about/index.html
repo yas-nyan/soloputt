@@ -38,6 +38,16 @@
         <p>MacではChrome、iPadではBluefyで開き、練習ページからZeroPuttに接続します。固定距離・ランダム・ホールアウトを選んで打つと、転がりと結果が表示されます。</p>
         <p>機器なしでも「デモを試す」でカップイン・OK・ミスを再生できます。</p>
       </section>
+      <section class="panel article" aria-labelledby="browser-heading">
+        <h2 id="browser-heading">対応ブラウザ</h2>
+        <p>ZeroPuttとの接続には、Bluetooth Low Energy（BLE）機器と通信できる <strong>Web Bluetooth API</strong> 対応ブラウザが必要です。SoloPuttをHTTPSで開き、接続時にBluetoothの利用を許可してください。</p>
+        <ul>
+          <li><strong>SoloPuttで実機確認済み</strong> — MacのChrome、iPadのBluefy</li>
+          <li><strong>API対応・SoloPuttの実機確認は未実施</strong> — WindowsのChrome・Edge、AndroidのChrome、ChromebookのChrome、iPhoneのBluefy</li>
+          <li><strong>標準ではAPI非対応</strong> — Safari、Firefox、iPhone・iPadの通常のChrome</li>
+        </ul>
+        <p><a href="https://github.com/whatwg/bluetooth/blob/main/implementation-status.md">Web Bluetoothの実装状況</a> · <a href="https://bluefy.app/guide.html">Bluefyの使い方</a></p>
+      </section>
       <section class="panel article" aria-labelledby="model-heading">
         <h2 id="model-heading">カップインの判定</h2>
         <p>平坦なグリーンを想定し、本体の推定距離・角度・グリーン速度から、ボールがカップの縁に到達する速度と横ずれを求めます。Pennerの論文に掲載された捕球限界の近似式を使った、SoloPutt独自の判定です。</p>

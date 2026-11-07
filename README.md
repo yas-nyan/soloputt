@@ -6,6 +6,19 @@ ZeroPuttでパッティングを練習し、方向や距離感の傾向を振り
 
 [SoloPuttを開く](https://yas-nyan.github.io/soloputt/)
 
+## 対応ブラウザ
+
+ZeroPuttとの接続には、Bluetooth Low Energy（BLE）機器と通信できる **Web Bluetooth API** 対応ブラウザが必要です。SoloPuttをHTTPSで開き、接続時にBluetoothの利用を許可してください。
+
+| 環境 | Web Bluetoothの対応状況 |
+| --- | --- |
+| MacのChrome、iPadのBluefy | SoloPuttで実機接続と計測を確認済み |
+| WindowsのChrome・Edge、AndroidのChrome、ChromebookのChrome | API対応。SoloPuttでの実機確認は未実施 |
+| iPhoneのBluefy | API対応。SoloPuttでの実機確認は未実施 |
+| Safari、Firefox、iPhone・iPadの通常のChrome | 標準ではAPI非対応 |
+
+ブラウザとOSの組み合わせによる違いは、公式資料で確認できます。[Web Bluetoothの実装状況](https://github.com/whatwg/bluetooth/blob/main/implementation-status.md) · [Bluefyの使い方](https://bluefy.app/guide.html)
+
 ## はじめて使う
 
 1. MacではChrome、iPadではBluefyでSoloPuttを開きます。
