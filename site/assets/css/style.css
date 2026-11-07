@@ -262,3 +262,7 @@ button.secondary.danger-button:not(:disabled):hover { background: #f8e9e5; }
 #analysis-scatter circle[data-outcome="unjudged"] { fill: #66786c; }
 #analysis-scatter .cup-point { fill: #225a3b; opacity: 1; }
 .angle-trend { display: block; height: .3rem; min-width: .12rem; margin-top: .2rem; border-radius: .2rem; background: #526b9b; }
+
+.about-device { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 1.1rem; align-items: center; }
+.about-device img { display: block; width: 100%; height: auto; border-radius: .6rem; }
+@media (max-width: 40rem) { .about-device { grid-template-columns: 1fr; } }
