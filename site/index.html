@@ -40,7 +40,7 @@
         <span class="console-status" id="round-status" role="status">接続待ち</span>
       </div>
       <div class="console-body">
-        <div class="course">
+        <div class="course" id="practice-course">
           <svg viewBox="0 0 520 278" role="img" aria-label="パットの軌道を示すグリーンの模式図">
             <defs>
               <linearGradient id="turf" x2="0%" y2="100%"><stop stop-color="#276145"/><stop offset="1" stop-color="#193c2d"/></linearGradient>
@@ -56,6 +56,11 @@
             <line id="trail" x1="260" y1="230" x2="260" y2="230"/>
             <circle id="ball" cx="260" cy="230" r="5"/>
           </svg>
+          <div class="course-feedback" id="course-feedback" aria-hidden="true" hidden>
+            <span class="feedback-mark" id="feedback-mark"></span>
+            <strong id="feedback-title"></strong>
+            <small id="feedback-detail"></small>
+          </div>
           <span class="course-caption">FLAT GREEN <span>模式図</span></span>
         </div>
         <dl class="console-values">
@@ -73,7 +78,7 @@
           <fieldset class="scenario-control">
             <legend class="sr-only">距離の出し方</legend>
             <label><input type="radio" name="scenario" value="fixed" checked><span>固定距離</span></label>
-            <label><input type="radio" name="scenario" value="random"><span>以内ランダム</span></label>
+            <label><input type="radio" name="scenario" value="random"><span>ランダム</span></label>
           </fieldset>
           <div class="distance-control">
             <label for="target-range">距離 / ランダムの上限</label>

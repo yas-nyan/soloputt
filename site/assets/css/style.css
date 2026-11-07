@@ -94,9 +94,9 @@ dd { font-weight: 800; font-variant-numeric: tabular-nums; }
 .shot-summary { margin: .75rem 0 .6rem; }
 .shot-summary > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .65rem; }
 #shot-outcome { font-size: 1.24rem; }
-#shot-outcome[data-outcome="holed"] { color: #1b6940; }
-#shot-outcome[data-outcome="concede"] { color: #386327; }
-#shot-outcome[data-outcome="miss"] { color: #855325; }
+#shot-outcome[data-outcome="holed"] { color: #185336; }
+#shot-outcome[data-outcome="concede"] { color: #176064; }
+#shot-outcome[data-outcome="miss"] { color: #77521e; }
 #shot-target { color: var(--text-muted); font-size: .8rem; }
 .measurements { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .32rem; }
 .measurements > div { border-radius: .5rem; background: #edf1e7; padding: .4rem .42rem; }
@@ -180,4 +180,36 @@ tbody tr:hover { background: #eaf0e4; }
   .about-grid { grid-template-columns: 1fr; }
   .stat-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .3rem; }
   .stat-cards .panel { padding: .5rem .4rem; }
+}
+
+.course-feedback {
+  position: absolute;
+  inset-inline: .35rem;
+  top: 57%;
+  transform: translateY(-50%);
+  width: fit-content;
+  max-width: calc(100% - .7rem);
+  margin-inline: auto;
+  display: grid;
+  justify-items: center;
+  gap: .12rem;
+  padding: .42rem clamp(.6rem, 2vw, 1.15rem);
+  border-radius: .8rem;
+  color: var(--tone-ink);
+  background: var(--tone-bg);
+  box-shadow: 0 .35rem 1.15rem #09191155;
+  text-align: center;
+  pointer-events: none;
+  animation: feedback-pop .26s ease-out both;
+}
+.feedback-mark { border-radius: 50%; display: grid; place-items: center; min-width: 1.7rem; height: 1.7rem; padding-inline: .2rem; background: var(--tone-ink); color: #fff; font-size: .82rem; font-weight: 800; }
+.course-feedback strong { font-size: clamp(1rem, 3vw, 1.4rem); line-height: 1.15; }
+.course-feedback small { font-size: .74rem; font-weight: 650; }
+.course[data-feedback="holed"] .cup-ring { transform-box: fill-box; transform-origin: center; stroke: #d9f098; stroke-width: 2.5; animation: cup-pulse .68s ease-out 2; }
+.course[data-feedback="concede"] #trail { stroke: #91e1d6; }
+.course[data-feedback="miss"] #trail { stroke: #f2c481; }
+@keyframes feedback-pop { from { transform: translateY(-45%) scale(.94); opacity: 0; } to { transform: translateY(-50%) scale(1); opacity: 1; } }
+@keyframes cup-pulse { from { transform: scale(.72); opacity: 1; } to { transform: scale(1.85); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .course-feedback, .course[data-feedback="holed"] .cup-ring { animation: none; }
 }

@@ -4,6 +4,7 @@ import { saveShot } from "./shot-store.mjs";
 const BALL_X = 260;
 const BALL_Y = 230;
 const CUP_Y = 64;
+const FEEDBACK_MARKS = { holed: "✓", concede: "OK", miss: "↻" };
 const REASONS = {
   angle: "打ち出し方向を読み取れませんでした",
   measurement: "計測値を確認できませんでした",
@@ -19,6 +20,8 @@ export function setupPractice() {
   const range = field("target-range");
   const ball = field("ball");
   const trail = field("trail");
+  const course = field("practice-course");
+  const feedback = field("course-feedback");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let scenario = "fixed";
   let limit = 3;
@@ -30,7 +33,22 @@ export function setupPractice() {
   let next;
   let saveFailures = 0;
 
+  function hideFeedback() {
+    feedback.hidden = true;
+    delete course.dataset.feedback;
+  }
+
+  function showFeedback(result, detail) {
+    course.dataset.feedback = result.outcome;
+    feedback.dataset.tone = result.outcome;
+    field("feedback-mark").textContent = FEEDBACK_MARKS[result.outcome];
+    field("feedback-title").textContent = OUTCOME_LABELS[result.outcome];
+    field("feedback-detail").textContent = detail;
+    feedback.hidden = false;
+  }
+
   function showTarget() {
+    hideFeedback();
     field("target").textContent = target.toFixed(1);
     field("remaining").textContent = target.toFixed(2);
     field("scenario-label").textContent = scenario === "random" ? `${limit.toFixed(1)} m以内ランダム` : "固定距離";
@@ -74,6 +92,7 @@ export function setupPractice() {
   }
 
   function animate(shot, result) {
+    hideFeedback();
     const scale = (BALL_Y - CUP_Y) / target;
     const capture = result.outcome === "holed";
     const fraction = shot.distance > 0 ? 1 - Math.sqrt(Math.max(0, 1 - result.travel / shot.distance)) : 0;
@@ -97,6 +116,8 @@ export function setupPractice() {
 
     function finish() {
       field("round-status").textContent = OUTCOME_LABELS[result.outcome];
+      const detail = capture ? "ナイスパット！" : `カップまで ${result.remaining.toFixed(2)} m`;
+      showFeedback(result, detail);
       if (scenario === "random") {
         next = setTimeout(() => {
           target = randomTarget(limit, target);
