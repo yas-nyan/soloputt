@@ -128,6 +128,7 @@ export class ZeroPuttConnection {
       if (this.#pending && line.startsWith(this.#pending.prefix)) {
         this.#pending.resolve(line);
       }
+      if (type === "3") this.#callbacks.settings?.(parseSettings(line));
       if (line === "B") {
         this.#sendReply("B");
       } else if (type === "0") {

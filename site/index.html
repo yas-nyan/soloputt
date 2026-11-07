@@ -3,32 +3,110 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="SoloPuttはZeroPuttの非公式Webクライアントです。推定距離、打ち出し方向、速度をブラウザで表示します。">
-  <title>SoloPutt — ZeroPuttの非公式Webクライアント</title>
+  <meta name="description" content="SoloPuttはZeroPuttでパッティングを練習し、結果を記録できる非公式Webクライアントです。">
+  <title>SoloPutt — パッティング練習</title>
   <link rel="stylesheet" href="./assets/css/style.css">
-  <script type="module" src="./assets/js/ble-test.mjs"></script>
+  <script type="module" src="./assets/js/app.mjs"></script>
 </head>
 <body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="wordmark" href="./" aria-label="SoloPutt ホーム"><span class="brand-mark" aria-hidden="true"></span>SoloPutt</a>
+      <nav aria-label="メインメニュー">
+        <a href="./" aria-current="page">練習</a><a href="./stats/">統計</a><a href="./about/">About</a>
+      </nav>
+    </div>
+  </header>
   <main>
-    <header>
-      <p class="eyebrow">ZeroPuttの非公式Webクライアント</p>
-      <h1>SoloPutt</h1>
-      <p>ZeroPuttに接続し、準備完了になったら1球打ってください。</p>
-    </header>
-
-    <section class="panel" aria-labelledby="connection-heading">
-      <div class="row">
-        <h2 id="connection-heading">接続</h2>
+    <section class="page-heading" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">PUTTING PRACTICE</p>
+        <h1 id="page-title">練習グリーン</h1>
+        <p>距離を決めて一球ずつ。ラインとタッチを確かめる。</p>
+      </div>
+      <div class="connection">
         <p id="status" class="status" data-state="idle" role="status">未接続</p>
+        <div class="connection-actions">
+          <button id="connect" type="button">ZeroPuttに接続</button>
+          <button id="disconnect" class="secondary" type="button" disabled>切断</button>
+        </div>
       </div>
-      <div class="actions">
-        <button id="connect" type="button">ZeroPuttに接続</button>
-        <button id="disconnect" type="button" disabled>切断</button>
-        <button id="open-device-settings" type="button" aria-controls="device-settings" aria-expanded="false" disabled>機器設定</button>
-        <button id="scan-all" type="button">絞り込みなしで探す(debug用)</button>
-      </div>
-      <p id="compatibility" class="note" hidden>HTTPSのページをiPadのBluefyまたはMacのChromeで開いてください。Macでのローカル開発にはlocalhostも使えます。</p>
     </section>
+    <p id="compatibility" class="note banner" hidden>HTTPSのページをiPadのBluefyまたはMacのChromeで開いてください。Macではlocalhostも使えます。</p>
+
+    <section class="green-console" aria-labelledby="green-title">
+      <div class="console-top">
+        <div><p class="console-kicker" id="scenario-label">固定距離</p><h2 id="green-title">パッティンググリーン</h2></div>
+        <span class="console-status" id="round-status" role="status">接続待ち</span>
+      </div>
+      <div class="console-body">
+        <div class="course">
+          <svg viewBox="0 0 520 278" role="img" aria-label="パットの軌道を示すグリーンの模式図">
+            <defs>
+              <linearGradient id="turf" x2="0%" y2="100%"><stop stop-color="#276145"/><stop offset="1" stop-color="#193c2d"/></linearGradient>
+            </defs>
+            <rect class="turf" width="520" height="278" rx="16" fill="url(#turf)"/>
+            <path class="mow" d="M0 44H520 M0 118H520 M0 192H520 M0 266H520"/>
+            <path class="course-lines" d="M0 81H520 M0 155H520 M0 230H520"/>
+            <path class="aim-line" d="M260 64V230"/>
+            <circle class="cup-ring" cx="260" cy="64" r="17"/>
+            <circle class="cup" cx="260" cy="64" r="8"/>
+            <path class="flag" d="M260 64V36h22l-5 6 5 6h-22"/>
+            <circle class="tee" cx="260" cy="230" r="10"/>
+            <line id="trail" x1="260" y1="230" x2="260" y2="230"/>
+            <circle id="ball" cx="260" cy="230" r="5"/>
+          </svg>
+          <span class="course-caption">FLAT GREEN <span>模式図</span></span>
+        </div>
+        <dl class="console-values">
+          <div><dt>目標距離</dt><dd><span id="target">3.0</span><small>m</small></dd></div>
+          <div><dt>残り距離</dt><dd><span id="remaining">3.00</span><small>m</small></dd></div>
+          <div><dt>グリーン速度</dt><dd id="green-speed">—</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <div class="practice-grid">
+      <section class="panel training-panel" aria-labelledby="training-heading">
+        <div class="panel-heading"><p class="eyebrow">DRILL</p><h2 id="training-heading">練習メニュー</h2></div>
+        <form id="practice-form">
+          <fieldset class="scenario-control">
+            <legend class="sr-only">距離の出し方</legend>
+            <label><input type="radio" name="scenario" value="fixed" checked><span>固定距離</span></label>
+            <label><input type="radio" name="scenario" value="random"><span>以内ランダム</span></label>
+          </fieldset>
+          <div class="distance-control">
+            <label for="target-range">距離 / ランダムの上限</label>
+            <div><input id="target-range" type="number" min="0.5" max="20" step="0.1" value="3.0" inputmode="decimal" required><span>m</span></div>
+          </div>
+          <p class="note">ランダムでは0.5 mから指定距離まで。1球ごとに次の目標が出ます。</p>
+          <button type="submit" class="apply-target">目標を適用</button>
+        </form>
+      </section>
+
+      <section class="panel result-panel" aria-labelledby="result-heading">
+        <div class="row">
+          <div class="panel-heading"><p class="eyebrow">LAST PUTT</p><h2 id="result-heading">直近のパット</h2></div>
+          <span id="shot-count" class="count-pill">0 球</span>
+        </div>
+        <div class="shot-summary">
+          <div><strong id="shot-outcome" role="status">受信待ち</strong><span id="shot-target">目標 —</span></div>
+          <p id="shot-reason" class="note">打つとここに結果を表示します。</p>
+        </div>
+        <dl class="measurements">
+          <div><dt>推定距離</dt><dd><span id="shot-distance">—</span><small>m</small></dd></div>
+          <div><dt>打ち出し</dt><dd><span id="shot-angle">—</span><small id="angle-unit">°</small></dd></div>
+          <div><dt>表示速度</dt><dd><span id="shot-speed">—</span><small>m/s</small></dd></div>
+          <div><dt>カップまで</dt><dd><span id="shot-remaining">—</span><small>m</small></dd></div>
+        </dl>
+        <p id="save-status" class="save-status" role="status"></p>
+      </section>
+    </div>
+
+    <div class="utility-bar">
+      <p>パットはこのブラウザに自動で記録されます。</p>
+      <button id="open-device-settings" class="secondary" type="button" aria-controls="device-settings" aria-expanded="false" disabled>機器設定</button>
+    </div>
 
     <section id="device-settings" class="panel" aria-labelledby="device-settings-heading" hidden>
       <div class="row">
@@ -55,7 +133,7 @@
           <dd id="device-unit">–</dd>
           <dt>アニメ効果 <small>スタンドアロン時の本体のボールアニメーション</small></dt>
           <dd id="device-animation">–</dd>
-          <dt>パター距離設定 <small>スタンドアロン時の距離設定 (筆者の環境では動かなかった) </small></dt>
+          <dt>パター距離設定 <small>スタンドアロン時の距離設定（検証環境では反映を確認できませんでした）</small></dt>
           <dd id="device-putt-distance">–</dd>
           <dt>コマンド設定 <small>本体センサーで目標距離やグリーンスピードを変更可能にするかどうか</small></dt>
           <dd id="device-command">–</dd>
@@ -63,24 +141,13 @@
       </details>
     </section>
 
-    <section class="panel" aria-labelledby="measurement-heading">
-      <div class="row">
-        <h2 id="measurement-heading">直近の計測</h2>
-        <p id="count" class="note" role="status">受信待ち</p>
-      </div>
-      <dl class="measurements">
-        <div><dt>本体の推定距離</dt><dd><span id="distance">–</span> <span class="unit">m</span></dd></div>
-        <div><dt>打ち出し方向</dt><dd><span id="angle">–</span> <span class="unit">°</span></dd></div>
-        <div><dt>表示速度</dt><dd><span id="speed">–</span> <span class="unit">m/s</span></dd></div>
-      </dl>
-      <p id="angle-note" class="note" hidden>+10.00°は角度エラーの可能性があります。受信値を表示しています。</p>
-    </section>
-
-    <details class="panel">
-      <summary>通信ログ</summary>
-      <p class="note">TX 9 は計測通知への応答です。</p>
+    <details class="panel diagnostics">
+      <summary>接続診断</summary>
+      <p class="note">通常の検索で出てこないときは、絞り込みなしで探せます。TX 9 は計測通知への応答です。</p>
+      <button id="scan-all" class="secondary" type="button">絞り込みなしで探す</button>
       <ol id="log"></ol>
     </details>
   </main>
+  <footer class="site-footer"><span>SoloPutt · ZeroPuttの非公式クライアント</span><a href="./about/">About</a></footer>
 </body>
 </html>

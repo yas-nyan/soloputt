@@ -1,19 +1,15 @@
 import { chooseDevice, ZeroPuttConnection } from "./bluetooth.mjs";
 import { setupDeviceSettings } from "./device-settings.mjs";
+import { setupPractice } from "./practice.mjs";
 
 const connect = document.querySelector("#connect");
 const scanAll = document.querySelector("#scan-all");
 const disconnect = document.querySelector("#disconnect");
 const status = document.querySelector("#status");
 const logList = document.querySelector("#log");
-const distance = document.querySelector("#distance");
-const angle = document.querySelector("#angle");
-const speed = document.querySelector("#speed");
-const count = document.querySelector("#count");
-const angleNote = document.querySelector("#angle-note");
 const setSettingsConnection = setupDeviceSettings();
+const practice = setupPractice();
 let connection;
-let shots = 0;
 
 function setStatus(message, state = "idle") {
   status.textContent = message;
@@ -27,22 +23,6 @@ function log(message) {
   if (logList.childElementCount > 30) logList.lastElementChild.remove();
 }
 
-function showShot(measurement) {
-  count.textContent = `${++shots} 球目`;
-  distance.textContent = measurement.distance.toFixed(2);
-  angle.textContent = `${measurement.angle > 0 ? "+" : ""}${measurement.angle.toFixed(2)}`;
-  speed.textContent = measurement.speed.toFixed(2);
-  angleNote.hidden = measurement.angle !== 10;
-}
-
-function resetReadout() {
-  shots = 0;
-  count.textContent = "受信待ち";
-  for (const field of [distance, angle, speed]) field.textContent = "–";
-  angleNote.hidden = true;
-  logList.replaceChildren();
-}
-
 function setDiscoveryDisabled(disabled) {
   connect.disabled = disabled;
   scanAll.disabled = disabled;
@@ -50,7 +30,7 @@ function setDiscoveryDisabled(disabled) {
 
 async function connectDevice(showAll) {
   setDiscoveryDisabled(true);
-  resetReadout();
+  logList.replaceChildren();
   setStatus("機器を選択してください", "working");
   let current;
   try {
@@ -58,15 +38,21 @@ async function connectDevice(showAll) {
     current = new ZeroPuttConnection(device, {
       status(message) {
         if (message === "初期化中") disconnect.disabled = false;
-        if (message === "計測準備完了") setSettingsConnection(current);
+        if (message === "計測準備完了") {
+          setSettingsConnection(current);
+          practice.setReady(true);
+        }
         setStatus(message, message === "計測準備完了" ? "ready" : "working");
       },
       log,
-      shot: showShot,
+      shot: practice.showShot,
+      settings: practice.setGreen,
       closed(message) {
         if (connection !== current) return;
         connection = undefined;
         setSettingsConnection(undefined);
+        practice.setReady(false);
+        practice.setGreen(null);
         disconnect.disabled = true;
         setDiscoveryDisabled(false);
         setStatus(message);
@@ -93,6 +79,7 @@ async function connectDevice(showAll) {
 connect.addEventListener("click", () => connectDevice(false));
 scanAll.addEventListener("click", () => connectDevice(true));
 disconnect.addEventListener("click", () => connection?.close());
+window.addEventListener("pagehide", () => connection?.close());
 
 if (!window.isSecureContext || typeof navigator.bluetooth?.requestDevice !== "function") {
   setDiscoveryDisabled(true);

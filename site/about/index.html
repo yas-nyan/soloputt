@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>About — SoloPutt</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="wordmark" href="../" aria-label="SoloPutt ホーム"><span class="brand-mark" aria-hidden="true"></span>SoloPutt</a>
+      <nav aria-label="メインメニュー">
+        <a href="../">練習</a><a href="../stats/">統計</a><a href="./" aria-current="page">About</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section class="page-heading" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">ABOUT THE PROJECT</p>
+        <h1 id="page-title">SoloPuttについて</h1>
+        <p>ZeroPuttでパッティングを練習するための非公式Webクライアントです。</p>
+      </div>
+    </section>
+    <div class="about-grid">
+      <section class="panel article" aria-labelledby="use-heading">
+        <h2 id="use-heading">使い方</h2>
+        <p>MacのChromeまたはiPadのBluefyで開き、練習ページからZeroPuttを接続します。固定距離か上限付きのランダム距離を選んで打つと、転がりと結果が表示されます。</p>
+        <p>統計やAboutへ移動すると、練習ページでのBLE接続は終了します。練習へ戻ったら再接続してください。</p>
+      </section>
+      <section class="panel article" aria-labelledby="model-heading">
+        <h2 id="model-heading">カップインの判定</h2>
+        <p>平坦なグリーンを想定し、本体の推定距離・角度・グリーン速度から、ボールがカップの縁に到達する速度と横ずれを求めます。Pennerの論文に掲載された捕球限界の近似式を使った、SoloPutt独自の判定です。</p>
+        <p><a href="https://doi.org/10.1139/p01-137">A. R. Penner, The physics of putting（2002年）</a></p>
+      </section>
+      <section class="panel article" aria-labelledby="privacy-heading">
+        <h2 id="privacy-heading">ショットの保存先</h2>
+        <p>練習履歴はこのサイトを開いたブラウザ内に保存されます。ショットは外部へ送信されず、端末間で同期されません。サイトデータを消去すると履歴も消えます。</p>
+      </section>
+      <section class="panel article" aria-labelledby="project-heading">
+        <h2 id="project-heading">開発とソースコード</h2>
+        <p>SoloPuttはZeroPuttメーカーから独立した個人プロジェクトです。</p>
+        <p><a class="external-link" href="https://github.com/yas-nyan/soloputt">GitHubでソースを見る <span aria-hidden="true">↗</span></a></p>
+      </section>
+    </div>
+  </main>
+  <footer class="site-footer"><span>SoloPutt · ZeroPuttの非公式クライアント</span><a href="https://github.com/yas-nyan/soloputt">GitHub</a></footer>
+</body>
+</html>

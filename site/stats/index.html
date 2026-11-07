@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>統計 — SoloPutt</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <script type="module" src="../assets/js/stats.mjs"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="wordmark" href="../" aria-label="SoloPutt ホーム"><span class="brand-mark" aria-hidden="true"></span>SoloPutt</a>
+      <nav aria-label="メインメニュー">
+        <a href="../">練習</a><a href="./" aria-current="page">統計</a><a href="../about/">About</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section class="page-heading" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">PRACTICE RECORD</p>
+        <h1 id="page-title">練習の記録</h1>
+        <p>目標距離ごとのカップイン率と、ミスしたときの残り距離。</p>
+      </div>
+      <label class="stats-filter" for="scenario-filter">練習メニュー
+        <select id="scenario-filter">
+          <option value="all">すべて</option>
+          <option value="fixed">固定距離</option>
+          <option value="random">以内ランダム</option>
+        </select>
+      </label>
+    </section>
+    <p id="stats-status" class="note banner" role="status">履歴を読み込み中…</p>
+    <div id="stats-content" hidden>
+      <dl class="stat-cards">
+        <div class="panel"><dt>総パット数</dt><dd id="total">—</dd><dd id="judged" class="stat-note"></dd></div>
+        <div class="panel"><dt>カップイン率</dt><dd id="rate">—</dd><dd id="cup-count" class="stat-note"></dd></div>
+        <div class="panel"><dt>ミス時の平均残り</dt><dd id="average-leave">—</dd><dd class="stat-note">止まった位置からカップまで</dd></div>
+      </dl>
+      <section class="panel stats-section" aria-labelledby="distance-heading">
+        <div class="panel-heading"><p class="eyebrow">BY DISTANCE</p><h2 id="distance-heading">目標距離別</h2></div>
+        <div class="table-wrap" tabindex="0" role="region" aria-labelledby="distance-heading">
+          <table>
+            <thead><tr><th scope="col">目標</th><th scope="col">球数</th><th scope="col">カップイン</th><th scope="col">ミス時の平均残り</th></tr></thead>
+            <tbody id="distance-stats"></tbody>
+          </table>
+        </div>
+        <p class="note">角度エラーなどの判定対象外の球は、カップイン率と平均残り距離の計算から除きます。</p>
+      </section>
+      <section class="panel stats-section" aria-labelledby="history-heading">
+        <div class="row">
+          <div class="panel-heading"><p class="eyebrow">RECENT PUTTS</p><h2 id="history-heading">ショット履歴</h2></div>
+          <span id="history-count" class="note"></span>
+        </div>
+        <div class="table-wrap" tabindex="0" role="region" aria-labelledby="history-heading">
+          <table>
+            <thead><tr><th scope="col">日時</th><th scope="col">練習</th><th scope="col">目標</th><th scope="col">結果</th><th scope="col">推定距離</th><th scope="col">方向</th><th scope="col">表示速度</th><th scope="col">残り</th></tr></thead>
+            <tbody id="history"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+  <footer class="site-footer"><span>SoloPutt · ZeroPuttの非公式クライアント</span><a href="../about/">About</a></footer>
+</body>
+</html>
