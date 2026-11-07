@@ -1,11 +1,14 @@
+import { recordStroke } from "./finish-round.mjs";
 import { OUTCOME_LABELS } from "./putting.mjs";
 
-export const CSV_FIELDS = [
+const ORIGINAL_FIELDS = [
   "time", "target", "scenario", "greenSpeed", "distance", "rollSpeed",
   "angle", "remaining", "speed", "outcome", "leave", "model",
 ];
 
-const OPTIONAL_NUMBERS = new Set(["greenSpeed", "leave", "model"]);
+const ROUND_FIELDS = ["roundId", "roundStart", "roundStroke", "roundScore"];
+export const CSV_FIELDS = [...ORIGINAL_FIELDS, ...ROUND_FIELDS];
+const OPTIONAL_NUMBERS = new Set(["greenSpeed", "leave", "model", "roundStart", "roundStroke", "roundScore"]);
 const DECIMAL = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i;
 
 export function shotIdentity(shot) {
@@ -35,7 +38,12 @@ function readValue(field, value) {
     return time;
   }
   if (field === "scenario") {
-    if (value !== "fixed" && value !== "random") throw new Error("scenario は fixed または random です");
+    if (!["fixed", "random", "finish"].includes(value)) throw new Error("scenario の値が不正です");
+    return value;
+  }
+  if (field === "roundId") {
+    if (!value) return null;
+    if (!/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(value)) throw new Error("roundId の形式が不正です");
     return value;
   }
   if (field === "outcome") {
@@ -45,16 +53,31 @@ function readValue(field, value) {
   if (!value && OPTIONAL_NUMBERS.has(field)) return null;
   const number = Number(value);
   if (!DECIMAL.test(value) || !Number.isFinite(number)) throw new Error(`${field} は数値で指定してください`);
-  if (field === "target" && (number < 0.5 || number > 20)) throw new Error("target は 0.5〜20 m で指定してください");
+
   if (field === "leave" && number < 0) throw new Error("leave は 0 以上で指定してください");
   if (field === "model" && (!Number.isSafeInteger(number) || number < 1)) throw new Error("model は正の整数で指定してください");
+  if ((field === "roundStroke" || field === "roundScore") && (!Number.isSafeInteger(number) || number < 1)) {
+    throw new Error(`${field} は正の整数で指定してください`);
+  }
   return number;
+}
+
+function validateRound(shot) {
+  if (shot.target < 0.5 || (shot.scenario !== "finish" && shot.target > 20)) throw new Error("target が範囲外です");
+  if (shot.scenario !== "finish" || shot.outcome === "unjudged") {
+    if (ROUND_FIELDS.some((field) => shot[field] != null)) throw new Error("打ち切りの打数は判定済みの打ち切りショットにだけ指定できます");
+    return;
+  }
+  const { roundId, roundStart, roundStroke, roundScore } = shot;
+  if (!roundId || !(roundStart >= 0.5 && roundStart <= 20) || !roundStroke) throw new Error("打ち切りの識別子・開始距離・打数が必要です");
+  if ((roundScore ?? null) !== recordStroke(roundStroke - 1, shot.outcome).score) throw new Error("roundScore がショットの結果と一致しません");
 }
 
 export function parseShotCSV(text) {
   const [first, ...lines] = text.replace(/^\uFEFF/, "").split(/\r\n?|\n/);
   const columns = readRow(first);
-  if (columns.length !== CSV_FIELDS.length || !CSV_FIELDS.every((field) => columns.includes(field))) {
+  const matches = (fields) => columns.length === fields.length && fields.every((field) => columns.includes(field));
+  if (!matches(ORIGINAL_FIELDS) && !matches(CSV_FIELDS)) {
     throw new Error("CSVの列名が一致しません。SoloPuttが書き出したCSVをひな形にしてください");
   }
 
@@ -67,6 +90,10 @@ export function parseShotCSV(text) {
       const shot = Object.fromEntries(columns.map((field, column) => [field, readValue(field, cells[column])]));
       if ((shot.outcome === "concede" || shot.outcome === "miss") && shot.leave === null) {
         throw new Error("OK圏内またはミスの球には leave が必要です");
+      }
+      validateRound(shot);
+      for (const field of ROUND_FIELDS) {
+        if (shot[field] == null) delete shot[field];
       }
       shots.push(shot);
     } catch (error) {

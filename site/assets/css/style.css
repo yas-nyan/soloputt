@@ -213,3 +213,10 @@ tbody tr:hover { background: #eaf0e4; }
 @media (prefers-reduced-motion: reduce) {
   .course-feedback, .course[data-feedback="holed"] .cup-ring { animation: none; }
 }
+
+.round-progress { margin-top: .7rem; color: #cbe3b7; font-size: .85rem; font-weight: 700; }
+.round-notice:not(:empty) { margin-top: .35rem; color: #ffe0aa; font-size: .82rem; }
+.shot-round { margin-top: .3rem; font-size: .88rem; font-weight: 750; }
+.finish-totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.3rem, 1fr)); gap: .4rem; margin-block: .7rem .45rem; }
+.finish-totals > div { padding: .45rem .55rem; border-radius: .45rem; color: var(--tone-ink, #42564c); background: var(--tone-bg, #e8eee8); }
+.finish-totals dd { font-size: 1rem; }

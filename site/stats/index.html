@@ -39,6 +39,7 @@
             <option value="all">すべて</option>
             <option value="fixed">固定距離</option>
             <option value="random">ランダム</option>
+            <option value="finish">打ち切り</option>
           </select>
         </label>
         <fieldset id="custom-range" class="stats-filters custom-range" hidden>
@@ -70,6 +71,20 @@
         <div class="panel stat-accent" data-tone="concede"><dt>OK圏内率</dt><dd id="concede-rate">—</dd><dd id="concede-count" class="stat-note"></dd></div>
         <div class="panel"><dt>入らなかった球の平均残り</dt><dd id="average-leave">—</dd><dd class="stat-note">止まった位置からカップまで</dd></div>
       </dl>
+      <section class="panel stats-section" id="finish-summary" aria-labelledby="finish-heading" hidden>
+        <div class="row">
+          <div class="panel-heading"><p class="eyebrow">PUTT OUT</p><h2 id="finish-heading">打ち切りの成績</h2></div>
+          <span id="finish-ok" class="note"></span>
+        </div>
+        <dl class="finish-totals">
+          <div><dt>完了</dt><dd id="finish-completed">—</dd></div>
+          <div><dt>平均打数</dt><dd id="finish-average">—</dd></div>
+          <div data-tone="holed"><dt>1打</dt><dd id="finish-one">—</dd></div>
+          <div data-tone="neutral"><dt>2打</dt><dd id="finish-two">—</dd></div>
+          <div data-tone="miss"><dt>3打以上</dt><dd id="finish-three">—</dd></div>
+        </dl>
+        <p class="note">完了した練習を集計します。OKは実打に1打加算。日付は完了した日です。</p>
+      </section>
       <section class="panel stats-section" aria-labelledby="daily-heading">
         <div class="row">
           <div class="panel-heading"><p class="eyebrow">DAY BY DAY</p><h2 id="daily-heading">日別の傾向</h2></div>
@@ -132,7 +147,7 @@
         </div>
         <div class="table-wrap" tabindex="0" role="region" aria-labelledby="history-heading">
           <table>
-            <thead><tr><th scope="col">日時</th><th scope="col">練習</th><th scope="col">目標</th><th scope="col">結果</th><th scope="col">推定距離</th><th scope="col">方向</th><th scope="col">表示速度</th><th scope="col">残り</th></tr></thead>
+            <thead><tr><th scope="col">日時</th><th scope="col">練習</th><th scope="col">目標</th><th scope="col">結果</th><th scope="col">推定距離</th><th scope="col">方向</th><th scope="col">表示速度</th><th scope="col">残り</th><th scope="col">打ち切り</th></tr></thead>
             <tbody id="history"></tbody>
           </table>
         </div>

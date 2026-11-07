@@ -29,3 +29,13 @@ test("CSV rejects invalid data with the row number before import", () => {
   assert.throws(() => parseShotCSV(`${header}\n${row.replace(",concede,", ",toString,")}`), /2行目.*outcome/);
   assert.throws(() => parseShotCSV("time,angle"), /列名/);
 });
+
+test("CSV imports legacy columns and preserves completed round metadata", () => {
+  assert.deepEqual(parseShotCSV(`${CSV_FIELDS.slice(0, 12).join(",")}\n${shotToCSV(shot).split(",").slice(0, 12).join(",")}`), [shot]);
+  const round = {
+    ...shot, scenario: "finish", roundId: "00000000-0000-4000-8000-000000000001",
+    roundStart: 6, roundStroke: 2, roundScore: 3,
+  };
+  assert.deepEqual(parseShotCSV(`${header}\n${shotToCSV(round)}`), [round]);
+  assert.throws(() => parseShotCSV(`${header}\n${shotToCSV({ ...round, roundScore: 2 })}`), /roundScore/);
+});

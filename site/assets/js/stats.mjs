@@ -86,8 +86,8 @@ function renderDistribution(prefix, stats, bands) {
   field(`${prefix}-empty`).hidden = total > 0;
 }
 
-function rateWithCount(count, total) {
-  return total ? `${rate(count, total)}（${count}球）` : "—";
+function rateWithCount(count, total, unit = "球") {
+  return total ? `${rate(count, total)}（${count}${unit}）` : "—";
 }
 
 function renderDaily(daily, dateRange) {
@@ -116,6 +116,15 @@ function renderStats(stats, daily, dateRange) {
   field("concede-count").textContent = `${stats.conceded} 球がOK圏内`;
   field("average-leave").textContent = averageLeave(stats);
 
+  const finish = stats.finish;
+  field("finish-summary").hidden = !finish.completed && filter.value !== "finish";
+  field("finish-completed").textContent = `${finish.completed} 回`;
+  field("finish-average").textContent = finish.completed ? `${(finish.strokes / finish.completed).toFixed(2)} 打` : "—";
+  field("finish-one").textContent = rateWithCount(finish.one, finish.completed, "回");
+  field("finish-two").textContent = rateWithCount(finish.two, finish.completed, "回");
+  field("finish-three").textContent = rateWithCount(finish.threePlus, finish.completed, "回");
+  field("finish-ok").textContent = `OKで終えた回数 ${finish.conceded} 回`;
+
   renderRows("distance-stats", Object.entries(stats.distances).map(([band, totals]) => {
     const lower = Number(band) / 2;
     const count = totals.holed + totals.conceded + totals.missed;
@@ -137,11 +146,13 @@ function renderStats(stats, daily, dateRange) {
 
 function renderHistory(history) {
   field("history-count").textContent = `このページ ${history.entries.length} / 全 ${selectedTotal} 球`;
+  const scenarios = { fixed: "固定", random: "ランダム", finish: "打ち切り" };
   renderRows("history", history.entries.map(({ shot }) => [
-    dateTime.format(shot.time), shot.scenario === "random" ? "ランダム" : "固定",
-    `${shot.target.toFixed(1)} m`, metric(OUTCOME_LABELS[shot.outcome], shot.outcome), `${shot.distance.toFixed(2)} m`,
+    dateTime.format(shot.time), scenarios[shot.scenario],
+    `${shot.target.toFixed(shot.scenario === "finish" ? 2 : 1)} m`, metric(OUTCOME_LABELS[shot.outcome], shot.outcome), `${shot.distance.toFixed(2)} m`,
     shot.angle === 10 ? "エラー" : `${formatAngle(shot.angle)}°`,
     `${shot.speed.toFixed(2)} m/s`, shot.leave === null ? "—" : `${shot.leave.toFixed(2)} m`,
+    shot.roundScore != null ? `${shot.roundScore}打で完了` : shot.roundStroke ? `${shot.roundStroke}打目` : "—",
   ]));
   newer.disabled = !history.hasNewer;
   older.disabled = !history.hasOlder;

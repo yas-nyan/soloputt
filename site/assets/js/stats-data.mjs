@@ -23,6 +23,7 @@ export function createStats() {
   return {
     ...counts(),
     distances: {},
+    finish: { completed: 0, strokes: 0, one: 0, two: 0, threePlus: 0, conceded: 0 },
     centre: 0,
     left: ANGLE_BANDS.map(() => 0),
     right: ANGLE_BANDS.map(() => 0),
@@ -67,6 +68,13 @@ function countBand(stats, side, magnitude, bands) {
 
 export function addShot(stats, shot) {
   countShot(stats, shot);
+  if (shot.scenario === "finish" && shot.roundScore != null) {
+    stats.finish.completed++;
+    stats.finish.strokes += shot.roundScore;
+    const band = shot.roundScore === 1 ? "one" : shot.roundScore === 2 ? "two" : "threePlus";
+    stats.finish[band]++;
+    if (shot.outcome === "concede") stats.finish.conceded++;
+  }
   const band = Math.floor(shot.target * 2);
   stats.distances[band] ??= counts();
   countShot(stats.distances[band], shot);
@@ -100,6 +108,7 @@ export function combineStats(summaries) {
       result.distances[band] ??= counts();
       addCounts(result.distances[band], totals);
     }
+    for (const key of Object.keys(result.finish)) result.finish[key] += summary.finish[key];
     result.centre += summary.centre;
     result.pace.centre += summary.pace.centre;
     for (let i = 0; i < ANGLE_BANDS.length; i++) {

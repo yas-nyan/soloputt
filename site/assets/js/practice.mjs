@@ -1,3 +1,4 @@
+import { recordStroke } from "./finish-round.mjs";
 import { evaluatePutt, formatAngle, OUTCOME_LABELS, randomTarget } from "./putting.mjs";
 import { saveShot } from "./shot-store.mjs";
 
@@ -32,6 +33,8 @@ export function setupPractice() {
   let frame;
   let next;
   let saveFailures = 0;
+  let round;
+  let pendingRound;
 
   function hideFeedback() {
     feedback.hidden = true;
@@ -49,9 +52,12 @@ export function setupPractice() {
 
   function showTarget() {
     hideFeedback();
-    field("target").textContent = target.toFixed(1);
+    field("target").textContent = target.toFixed(round?.strokes ? 2 : 1);
     field("remaining").textContent = target.toFixed(2);
-    field("scenario-label").textContent = scenario === "random" ? `${limit.toFixed(1)} m以内ランダム` : "固定距離";
+    field("scenario-label").textContent = scenario === "random" ? `${limit.toFixed(1)} m以内ランダム`
+      : round ? "打ち切り" : "固定距離";
+    field("round-progress").hidden = !round;
+    if (round) field("round-progress").textContent = `開始 ${limit.toFixed(1)} m · 次は ${round.strokes + 1} 打目`;
     field("round-status").textContent = ready ? "準備完了" : "接続待ち";
     ball.setAttribute("cx", BALL_X);
     ball.setAttribute("cy", BALL_Y);
@@ -65,12 +71,34 @@ export function setupPractice() {
     clearTimeout(next);
   }
 
+  function startRound() {
+    target = limit;
+    round = { id: crypto.randomUUID(), strokes: 0 };
+  }
+
+  function advanceRound() {
+    if (!pendingRound) return;
+    if (pendingRound.score === null) target = pendingRound.remaining;
+    else startRound();
+    pendingRound = undefined;
+  }
+
+  form.addEventListener("change", (event) => {
+    if (event.target.name !== "scenario") return;
+    const labels = { fixed: "目標距離", random: "ランダムの上限", finish: "打ち切りの開始距離" };
+    field("target-label").textContent = labels[event.target.value];
+  });
+
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     const selection = new FormData(form);
     limit = range.valueAsNumber;
     scenario = selection.get("scenario");
-    target = scenario === "random" ? randomTarget(limit, target) : limit;
+    pendingRound = undefined;
+    round = undefined;
+    if (scenario === "finish") startRound();
+    else target = scenario === "random" ? randomTarget(limit, target) : limit;
+    field("round-notice").textContent = "";
     stopAnimation();
     showTarget();
   });
@@ -79,6 +107,7 @@ export function setupPractice() {
     ready = value;
     if (!ready) {
       stopAnimation();
+      advanceRound();
       showTarget();
     } else {
       field("round-status").textContent = "準備完了";
@@ -91,7 +120,7 @@ export function setupPractice() {
     field("green-speed").textContent = settings?.greenSpeedLabel ?? feet;
   }
 
-  function animate(shot, result) {
+  function animate(shot, result, roundResult) {
     hideFeedback();
     const scale = (BALL_Y - CUP_Y) / target;
     const capture = result.outcome === "holed";
@@ -116,9 +145,17 @@ export function setupPractice() {
 
     function finish() {
       field("round-status").textContent = OUTCOME_LABELS[result.outcome];
-      const detail = capture ? "ナイスパット！" : `カップまで ${result.remaining.toFixed(2)} m`;
+      const detail = roundResult?.score != null
+        ? `${roundResult.score} 打で完了${capture ? "" : "（OKの +1 打込み）"}`
+        : capture ? "ナイスパット！" : `カップまで ${result.remaining.toFixed(2)} m`;
       showFeedback(result, detail);
-      if (scenario === "random") {
+      if (roundResult) {
+        next = setTimeout(() => {
+          advanceRound();
+          field("round-notice").textContent = "";
+          showTarget();
+        }, roundResult.score === null ? 900 : 1800);
+      } else if (scenario === "random") {
         next = setTimeout(() => {
           target = randomTarget(limit, target);
           showTarget();
@@ -144,11 +181,25 @@ export function setupPractice() {
   }
 
   function showShot(shot) {
+    if (pendingRound) {
+      field("round-notice").textContent = "次の「準備完了」が出てから打ってください。";
+      return;
+    }
     stopAnimation();
     const result = evaluatePutt(shot, target, greenSpeed);
+    const stroke = round ? recordStroke(round.strokes, result.outcome) : null;
+    if (stroke) {
+      round.strokes = stroke.stroke;
+      pendingRound = { score: stroke.score, remaining: result.remaining };
+    }
     const number = ++shots;
     field("shot-count").textContent = `${number} 球`;
-    field("shot-target").textContent = `目標 ${target.toFixed(1)} m`;
+    field("shot-target").textContent = `目標 ${target.toFixed(round ? 2 : 1)} m`;
+    field("shot-round").hidden = !stroke;
+    if (stroke) {
+      field("shot-round").textContent = stroke.score === null ? `${stroke.stroke} 打目 · 残り ${result.remaining.toFixed(2)} m`
+        : `${stroke.score} 打で完了${result.outcome === "concede" ? "（OKの +1 打込み）" : ""}`;
+    }
     field("shot-outcome").textContent = OUTCOME_LABELS[result.outcome];
     field("shot-outcome").dataset.outcome = result.outcome;
     field("shot-reason").textContent = REASONS[result.reason] ?? "カップに収まりました";
@@ -162,12 +213,13 @@ export function setupPractice() {
       showTarget();
       field("round-status").textContent = "判定対象外";
     } else {
-      animate(shot, result);
+      animate(shot, result, stroke);
     }
 
     saveShot({
       time: Date.now(), target, scenario, greenSpeed, ...shot,
       outcome: result.outcome, leave: result.remaining ?? null, model: 1,
+      ...(stroke ? { roundId: round.id, roundStart: limit, roundStroke: stroke.stroke, roundScore: stroke.score } : {}),
     }).catch(() => {
       field("save-status").textContent = `${++saveFailures} 球を履歴に保存できませんでした`;
     });
