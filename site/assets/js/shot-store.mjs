@@ -1,4 +1,3 @@
-import { classifyLeave } from "./putting.mjs";
 import { shotIdentity } from "./shot-csv.mjs";
 import { localDay } from "./stats-dates.mjs";
 import { addDailyShot, addShot, createDailyStats, createStats } from "./stats-data.mjs";
@@ -31,7 +30,8 @@ function upgrade(request, oldVersion) {
       return;
     }
     const shot = cursor.value;
-    if (oldVersion === 1 && shot.outcome === "miss" && classifyLeave(shot.leave) === "concede") {
+    // Version 1 records predate OK and use the historical 1 m rule on upgrade.
+    if (oldVersion === 1 && shot.outcome === "miss" && Number.isFinite(shot.leave) && shot.leave >= 0 && shot.leave < 1) {
       shot.outcome = "concede";
       cursor.update(shot);
     }

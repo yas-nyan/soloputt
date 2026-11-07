@@ -1,4 +1,4 @@
-import { evaluatePutt, randomTarget } from "./putting.mjs";
+import { evaluatePutt, randomTarget, SHOT_MODEL_VERSION } from "./putting.mjs";
 
 export function* generateSampleShots(count, seed, {
   start = Date.UTC(2025, 0, 1) + (seed % 365) * 86_400_000,
@@ -32,7 +32,7 @@ export function* generateSampleShots(count, seed, {
     const result = evaluatePutt({ distance, angle }, target, greenSpeed);
     yield {
       time, target, scenario, greenSpeed, distance, rollSpeed, angle,
-      remaining: 0, speed, outcome: result.outcome, leave: result.remaining ?? null, model: 1,
+      remaining: 0, speed, outcome: result.outcome, leave: result.remaining ?? null, model: SHOT_MODEL_VERSION,
     };
   }
 }

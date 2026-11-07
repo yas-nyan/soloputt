@@ -1,5 +1,5 @@
 import { recordStroke } from "./finish-round.mjs";
-import { evaluatePutt, formatAngle, OUTCOME_LABELS, randomTarget } from "./putting.mjs";
+import { evaluatePutt, formatAngle, OUTCOME_LABELS, randomTarget, SHOT_MODEL_VERSION } from "./putting.mjs";
 import { DEMO_GREEN_SPEED, demoShot } from "./practice-demo.mjs";
 import { saveShot } from "./shot-store.mjs";
 
@@ -269,7 +269,7 @@ export function setupPractice() {
     if (!persist) return;
     saveShot({
       time: Date.now(), target, scenario, greenSpeed, ...shot,
-      outcome: result.outcome, leave: result.remaining ?? null, model: 1,
+      outcome: result.outcome, leave: result.remaining ?? null, model: SHOT_MODEL_VERSION,
       ...(stroke ? { roundId: (round.id ??= crypto.randomUUID()), roundStart: round.start, roundStroke: stroke.stroke, roundScore: stroke.score } : {}),
     }).catch(() => {
       field("save-status").textContent = `${++saveFailures} 球を履歴に保存できませんでした`;

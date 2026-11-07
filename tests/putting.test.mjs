@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { evaluatePutt, randomTarget } from "../site/assets/js/putting.mjs";
+import { classifyLeave, evaluatePutt, randomTarget } from "../site/assets/js/putting.mjs";
 
 test("uses cup entry rather than requiring the ball to reach the centre", () => {
   const hit = evaluatePutt({ distance: 2.95, angle: 0 }, 3, 244);
@@ -19,8 +19,13 @@ test("uses green speed and lateral offset for the capture limit", () => {
   assert.equal(evaluatePutt({ distance: 10, angle: 0 }, 3, 244).reason, "pace");
 });
 
-test("records an uncaptured putt under one metre as a separate outcome", () => {
-  assert.equal(evaluatePutt({ distance: 2.1, angle: 0 }, 3, 244).outcome, "concede");
+test("records an uncaptured putt within fifty centimetres as a separate outcome", () => {
+  assert.equal(classifyLeave(0.5), "concede");
+  assert.equal(classifyLeave(0.5001), "miss");
+  assert.equal(evaluatePutt({ distance: 2.5, angle: 0 }, 3, 244).outcome, "concede");
+  assert.equal(evaluatePutt({ distance: 2.49, angle: 0 }, 3, 244).outcome, "miss");
+  assert.equal(evaluatePutt({ distance: 3.45, angle: 1.5 }, 3, 244).outcome, "concede");
+  assert.equal(evaluatePutt({ distance: 3.51, angle: 1.5 }, 3, 244).outcome, "miss");
   assert.equal(evaluatePutt({ distance: 4, angle: 2 }, 3, 244).outcome, "miss");
   assert.equal(evaluatePutt({ distance: 2, angle: 0 }, 3, 244).outcome, "miss");
   assert.equal(evaluatePutt({ distance: 3, angle: 2 }, 3, 244).outcome, "concede");

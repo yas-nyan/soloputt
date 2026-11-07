@@ -3,10 +3,11 @@ const STIMP_RELEASE_SPEED = 1.83;
 const CENTRE_CAPTURE_SPEED = 1.63;
 
 const MIN_TARGET = 0.5;
-const OK_DISTANCE = 1;
+const OK_DISTANCE = 0.5;
+export const SHOT_MODEL_VERSION = 2;
 
 export function classifyLeave(distance) {
-  return Number.isFinite(distance) && distance >= 0 && distance < OK_DISTANCE ? "concede" : "miss";
+  return Number.isFinite(distance) && distance >= 0 && distance <= OK_DISTANCE ? "concede" : "miss";
 }
 
 export function randomTarget(minimum, maximum, previous, random = Math.random) {
