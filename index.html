@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ZeroPuttの距離、打ち出し方向、速度をブラウザで受信する非公式のBLE検証ページ。">
+  <title>Putt Link — BLE計測テスト</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">BLE計測テスト</p>
+      <h1>Putt Link</h1>
+      <p>ZeroPuttに接続し、準備完了になったら1球打ってください。</p>
+    </header>
+
+    <section class="panel" aria-labelledby="connection-heading">
+      <div class="row">
+        <h2 id="connection-heading">接続</h2>
+        <p id="status" class="status" data-state="idle" role="status">未接続</p>
+      </div>
+      <div class="actions">
+        <button id="connect" type="button">ZeroPuttに接続</button>
+        <button id="disconnect" type="button" disabled>切断</button>
+      </div>
+      <p id="compatibility" class="note" hidden>HTTPSのページをiPadのBluefyまたはMacのChromeで開いてください。Macでのローカル開発にはlocalhostも使えます。</p>
+    </section>
+
+    <section class="panel" aria-labelledby="measurement-heading">
+      <div class="row">
+        <h2 id="measurement-heading">直近の計測</h2>
+        <p id="count" class="note" role="status">受信待ち</p>
+      </div>
+      <dl class="measurements">
+        <div><dt>本体の推定距離</dt><dd><span id="distance">–</span> <span class="unit">m</span></dd></div>
+        <div><dt>打ち出し方向</dt><dd><span id="angle">–</span> <span class="unit">°</span></dd></div>
+        <div><dt>表示速度</dt><dd><span id="speed">–</span> <span class="unit">m/s</span></dd></div>
+      </dl>
+      <p id="angle-note" class="note" hidden>+10.00°は角度エラーの可能性があります。受信値を表示しています。</p>
+    </section>
+
+    <details class="panel">
+      <summary>通信ログ</summary>
+      <p class="note">TX 9 は計測通知への応答です。</p>
+      <ol id="log"></ol>
+    </details>
+
+    <footer>ZeroPutt対応の非公式クライアントです。</footer>
+  </main>
+</body>
+</html>
