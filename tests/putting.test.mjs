@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { classifyLeave, evaluatePutt, randomTarget } from "../site/assets/js/putting.mjs";
+import { classifyLeave, evaluatePutt, formatAngle, randomTarget } from "../site/assets/js/putting.mjs";
 
 test("uses cup entry rather than requiring the ball to reach the centre", () => {
   const hit = evaluatePutt({ distance: 2.95, angle: 0 }, 3, 244);
@@ -45,4 +45,10 @@ test("random practice covers the inclusive range without repeating when possible
   assert.equal(randomTarget(0.5, 0.6, 0.5, () => 0), 0.6);
   assert.equal(randomTarget(0.5, 0.6, 0.6, () => 0.999), 0.5);
   assert.equal(randomTarget(0.5, 0.5, 0.5, () => 0.999), 0.5);
+});
+
+test("prefixes signed angles with the direction letter", () => {
+  assert.equal(formatAngle(0.5), "R0.50");
+  assert.equal(formatAngle(-0.5), "L0.50");
+  assert.equal(formatAngle(0), "0.00");
 });

@@ -54,5 +54,5 @@ export const OUTCOME_LABELS = { holed: "カップイン", concede: "OK圏内", m
 
 export function formatAngle(angle) {
   if (angle === 0) return "0.00";
-  return `${angle < 0 ? "L" : "R"} ${Math.abs(angle).toFixed(2)}`;
+  return `${angle < 0 ? "L" : "R"}${Math.abs(angle).toFixed(2)}`;
 }
