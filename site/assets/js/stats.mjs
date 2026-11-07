@@ -1,3 +1,4 @@
+import { setupAnalysis } from "./analysis-view.mjs";
 import { createDemoReader } from "./demo-stats.mjs";
 import { setupCSVTools } from "./csv-tools.mjs";
 import { formatAngle, OUTCOME_LABELS } from "./putting.mjs";
@@ -23,6 +24,7 @@ let selectedRange;
 let selectedTotal;
 let requestId = 0;
 let demoReader;
+const showAnalysis = setupAnalysis();
 
 function rate(count, total) {
   return total ? `${Math.round(100 * count / total)}%` : "—";
@@ -176,6 +178,7 @@ async function load(options, refreshStats = !options) {
     content.hidden = true;
     status.hidden = false;
     status.textContent = error.message;
+    showAnalysis(null);
     return;
   }
 
@@ -187,7 +190,10 @@ async function load(options, refreshStats = !options) {
     page = result;
     pageOptions = options;
     selectedRange = dateRange;
-    if (refreshStats) renderStats(combineStats(result.summaries), result.daily, dateRange);
+    if (refreshStats) {
+      renderStats(combineStats(result.summaries), result.daily, dateRange);
+      showAnalysis({ scenario, dateRange, visit: demoReader?.visit });
+    }
     renderHistory(result);
     if (options) {
       const heading = field("history-heading");
@@ -199,6 +205,7 @@ async function load(options, refreshStats = !options) {
     content.hidden = true;
     status.hidden = false;
     status.textContent = "このブラウザの保存領域から履歴を読み込めませんでした。";
+    showAnalysis(null);
   }
 }
 

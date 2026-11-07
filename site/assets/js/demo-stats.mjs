@@ -38,13 +38,21 @@ export function createDemoReader(now = Date.now()) {
   const samples = [...generateSampleShots(count, 42, {
     start: now - span, interval: Math.floor(span / count), varyByDay: true,
   }), ...finish];
-  const records = samples.map((shot, id) => ({ shot, key: { time: shot.time, id } }))
+  const records = samples.map((shot, id) => {
+    const day = localDay(shot.time);
+    const sessionTheme = shot.scenario === "finish" ? "ホールアウト" : shot.scenario === "random" ? "距離感" : "方向性";
+    return { shot: { ...shot, sessionId: `demo-${day}-${shot.scenario}`, sessionTheme, sessionPutter: "サンプルパター",
+      sessionMat: "平坦マット" }, key: { time: shot.time, id } };
+  })
     .sort((a, b) => b.key.time - a.key.time || b.key.id - a.key.id);
 
-  return (scenario, { dateRange, boundary, newer, includeStats, pageSize = 50 }) => {
-    const matches = records.filter(({ shot }) =>
-      (scenario === "all" || shot.scenario === scenario) &&
-      (!dateRange || (shot.time >= dateRange.start && shot.time < dateRange.end)));
+  function matchesScope(shot, scenario, dateRange) {
+    return (scenario === "all" || shot.scenario === scenario) &&
+      (!dateRange || (shot.time >= dateRange.start && shot.time < dateRange.end));
+  }
+
+  function read(scenario, { dateRange, boundary, newer, includeStats, pageSize = 50 }) {
+    const matches = records.filter(({ shot }) => matchesScope(shot, scenario, dateRange));
     const anchor = boundary ? matches.findIndex(({ key }) => key.id === boundary.id) : -1;
     const start = newer ? Math.max(0, anchor - pageSize) : anchor + 1;
     const end = newer ? anchor : start + pageSize;
@@ -65,5 +73,12 @@ export function createDemoReader(now = Date.now()) {
       addDailyShot(daily.get(day), shot);
     }
     return { ...page, summaries: [summary], daily };
+  }
+
+  read.visit = async (visit, { scenario, dateRange }) => {
+    for (const { shot } of records.slice().reverse()) {
+      if (matchesScope(shot, scenario, dateRange)) visit(shot);
+    }
   };
+  return read;
 }

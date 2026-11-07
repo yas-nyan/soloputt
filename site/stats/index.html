@@ -83,6 +83,66 @@
       </details>
       <p id="delete-status" class="note" role="status"></p>
     </section>
+    <details id="advanced-analysis" class="panel analysis-panel">
+      <summary>詳しい分析</summary>
+      <div class="stats-filters analysis-controls">
+        <label class="stats-filter">練習セッション<select id="analysis-session"><option value="">すべて</option></select></label>
+        <label class="stats-filter">判定<select id="analysis-judgment">
+          <option value="recorded">記録当時の判定</option><option value="current">現行モデルで再計算</option>
+        </select></label>
+      </div>
+      <p id="analysis-status" class="note" role="status"></p>
+      <div id="analysis-content" hidden>
+        <p id="analysis-environment" class="note"></p>
+        <dl class="finish-totals">
+          <div><dt>打球数</dt><dd id="analysis-count">—</dd></div>
+          <div><dt>平均絶対角度誤差</dt><dd id="analysis-angle">—</dd></div>
+          <div><dt>平均距離誤差</dt><dd id="analysis-distance">—</dd></div>
+          <div><dt>カップイン率</dt><dd id="analysis-rate">—</dd></div>
+        </dl>
+        <p id="analysis-model" class="note"></p>
+        <section class="analysis-section" aria-labelledby="session-trend-heading">
+          <h2 id="session-trend-heading">セッション内の変化</h2>
+          <p class="note">セッションを選ぶと、記録順に10球ずつ比較できます。角度エラーは角度の平均から除きます。</p>
+          <div id="analysis-blocks-wrap" class="table-wrap" tabindex="0" role="region" aria-labelledby="session-trend-heading" hidden>
+            <table><thead><tr><th>打球</th><th>平均絶対角度誤差</th><th>平均距離誤差</th></tr></thead><tbody id="analysis-blocks"></tbody></table>
+          </div>
+        </section>
+        <section class="analysis-section" aria-labelledby="scatter-heading">
+          <h2 id="scatter-heading">推定停止位置</h2>
+          <p id="analysis-scatter-caption" class="note"></p>
+          <svg id="analysis-scatter" viewBox="0 0 500 300" role="img" aria-label="カップを中心としたパットの推定停止位置"></svg>
+          <p id="analysis-hint" class="note"></p>
+        </section>
+        <section class="analysis-section" aria-labelledby="round-analysis-heading">
+          <h2 id="round-analysis-heading">ホールアウトの開始距離別</h2>
+          <p id="analysis-gimme" class="note"></p>
+          <div class="table-wrap" tabindex="0" role="region" aria-labelledby="round-analysis-heading">
+            <table><thead><tr><th>開始距離</th><th>完了</th><th>平均打数</th><th>1打</th><th>2打</th><th>3打以上</th><th>初回の平均残り</th></tr></thead><tbody id="analysis-rounds"></tbody></table>
+          </div>
+          <div id="analysis-tests-wrap" hidden>
+            <h2 id="analysis-tests-heading">実戦テストの成績</h2>
+            <div class="table-wrap" tabindex="0" role="region" aria-labelledby="analysis-tests-heading">
+              <table><thead><tr><th>日付</th><th>完了ホール</th><th>合計打数</th><th>平均打数</th><th>3打以上</th></tr></thead><tbody id="analysis-tests"></tbody></table>
+            </div>
+          </div>
+        </section>
+        <section class="analysis-section" aria-labelledby="compare-heading">
+          <h2 id="compare-heading">同条件での日付比較</h2>
+          <p class="note">同じグリーン速度と距離帯で、2日間のカップイン率を比較します。練習メニューは上の選択を使い、セッションは日ごとにまとめます。</p>
+          <form id="analysis-compare" class="stats-filters analysis-controls">
+            <label class="stats-filter">比較日 A<input id="compare-a" type="date" required></label>
+            <label class="stats-filter">比較日 B<input id="compare-b" type="date" required></label>
+            <label class="stats-filter">グリーン速度<select id="compare-speed" required></select></label>
+            <button class="secondary" type="submit">比較</button>
+          </form>
+          <p id="compare-status" class="note" role="status"></p>
+          <div id="compare-wrap" class="table-wrap" tabindex="0" role="region" aria-labelledby="compare-heading" hidden>
+            <table><thead><tr><th>目標距離</th><th>比較日 A</th><th>比較日 B</th></tr></thead><tbody id="compare-rows"></tbody></table>
+          </div>
+        </section>
+      </div>
+    </details>
     <p id="stats-status" class="note banner" role="status">履歴を読み込み中…</p>
     <div id="stats-content" hidden>
       <dl class="stat-cards">
@@ -126,7 +186,7 @@
             <tbody id="distance-stats"></tbody>
           </table>
         </div>
-        <p class="note">距離帯は下限を含み、上限を含みません。現在のOK圏内はカップから50 cm以内です。過去の記録は当時の判定で集計します。判定対象外の球は各率と平均残り距離から除きます。</p>
+        <p class="note">距離帯は下限を含み、上限を含みません。通常のOK圏内はカップから50 cm以内です。ホールアウトは選んだOK距離で記録し、統計は記録時の判定を使います。判定対象外の球は各率と平均残り距離から除きます。</p>
       </section>
       <section class="panel stats-section" aria-labelledby="direction-heading">
         <div class="panel-heading"><p class="eyebrow">START LINE</p><h2 id="direction-heading">打ち出し方向の分布</h2></div>

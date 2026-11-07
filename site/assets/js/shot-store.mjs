@@ -178,9 +178,10 @@ export function deleteShots({ all = false, id, dateRange }) {
   });
 }
 
-export function forEachShot(visit) {
+export function forEachShot(visit, { scenario = "all", dateRange = null } = {}) {
   return access("readonly", (transaction) => {
-    const request = transaction.objectStore(SHOTS).index(TIME).openCursor();
+    const request = shotCursor(transaction.objectStore(SHOTS), scenario, dateRange?.start ?? -MAX_TIME,
+      dateRange ? dateRange.end - 1 : MAX_TIME, "next");
     request.onsuccess = () => {
       const cursor = request.result;
       if (!cursor) return;
